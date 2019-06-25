@@ -5,5 +5,5 @@ This is a collection of projects that I have done in Self-Driving Car Nanodegree
 1. Lane lines finding
 2. Advanced lane lines finding
 3. Traffic sign classifier using LeNet
-4. Transfer learning of steering prediction using Nvidia model
+4. Transfer learning for behavioral cloning using Nvidia model
 5. Extended Kalman Filter
