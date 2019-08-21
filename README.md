@@ -7,3 +7,4 @@ This is a collection of projects that I have done in Self-Driving Car Nanodegree
 3. Traffic sign classifier using LeNet
 4. Transfer learning for behavioral cloning using Nvidia model
 5. Extended Kalman Filter
+6. Kidnaped Vehicle Project
