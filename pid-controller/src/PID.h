@@ -1,6 +1,7 @@
 #ifndef PID_H
 #define PID_H
 #include <vector>
+#include <uWS/uWS.h>
 
 using std::vector;
 
@@ -21,6 +22,7 @@ class PID {
    * @param (Kp_, Ki_, Kd_) The initial PID coefficients
    */
   void Init(vector<double> tau, vector<double> gd, int max);
+  void Init_throttle(vector<double> tau, vector<double> gd, int timestep);
   /**
    * PID Errors
    */
@@ -51,11 +53,17 @@ class PID {
    */
   float TotalError();
 
+  void Restart(uWS::WebSocket<uWS::SERVER> ws);
+
   float Twiddle(double tol, double rate);
+
+  float Twiddle_throttle(double tol, double rate);
 
  private:
   bool do_twiddle;
   int twiddle_timestep;
+  double max_throttle;
+  double min_throttle;
   float total_error;
 
 };
