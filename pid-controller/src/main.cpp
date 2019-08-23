@@ -39,12 +39,12 @@ int main() {
   /**
    * TODO: Initialize the pid variable.
    */
-  int evaluation_steps = 20;
+  int evaluation_steps = 1;
   vector<double> tau = {0.05, 2.0, 0.005};
   vector<double> gd = {0.1, 0.1, 0.1};
   pid.Init(tau, gd, evaluation_steps);
 
-  h.onMessage([&pid, &pid_throttle](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length, 
+  h.onMessage([&pid](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length, 
                      uWS::OpCode opCode) {
     // "42" at the start of the message means there's a websocket message event.
     // The 4 signifies a websocket message
@@ -74,7 +74,7 @@ int main() {
           std::cout << "-----------------------------" << std::endl;
           pid.UpdateError(cte);
           steer_value = pid.Twiddle(tolerance, rate);
-          throttle = (1 - steer_value)*0.5;
+          throttle = (1 - fabs(steer_value))*0.5;
           
 
           // DEBUG
@@ -87,7 +87,7 @@ int main() {
           msgJson["steering_angle"] = steer_value;
           msgJson["throttle"] = 0.4;
           auto msg = "42[\"steer\"," + msgJson.dump() + "]";
-          std::cout << msg << std::endl;
+          //std::cout << msg << std::endl;
           ws.send(msg.data(), msg.length(), uWS::OpCode::TEXT);
         }  // end "telemetry" if
       } else {

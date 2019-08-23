@@ -64,33 +64,34 @@ void PID::Restart(uWS::WebSocket<uWS::SERVER> ws) {
 float PID::Twiddle(double tol, double rate){
   float total_error = this->total_error/ this->counter; 
   if (this->do_twiddle == true){
-    cout << "Best error: " << total_error << " | " << this->_gd[0] + this->_gd[1] + this->_gd[2] << " | tau: "
+    cout << "Best error: " << total_error << " | tau: "
           << this->_tau[0] << ", " << this->_tau[1] << ", " << this->_tau[2] << " | gd: "
           << this->_gd[0] << ", " << this->_gd[1] << ", " << this->_gd[2] << endl;
     for (unsigned int i=0; i < _cte.size(); i++){
       // increase tau
-      this->_tau[i] += this->_gd[i];
       // Check currently if total error is less than best error
       if (total_error < this->best_error){
+        this->_tau[i] += this->_gd[i];
         this->best_error = total_error;
         this->_gd[i] *= (1.0 + rate);
       }
       // else reset the tau and incre or decre the tau and gd depending on if total error is still greater than best error
       else {
-        this->_tau[i] -= 2*this->_gd[i];
         if (fabs(this->prev_cte) < fabs(this->_cte[0])){
+          this->_tau[i] -= 2*this->_gd[i];
           this->_gd[i] *= (1.0 + rate);
         }
         else {
           this->_tau[i] += this->_gd[i];
           this->_gd[i] *= (1.0 - rate);
         }
+        cout << "Prev: " << this->prev_cte << ", " << this->_cte[0] << endl;
       }
     }
 
     this->counter = 0;
     this->total_error = 0;
-    cout << "Final -- Best error: " << this->best_error << " | tau: "
+    cout << "Final -- : " << this->best_error << " | tau: "
           << this->_tau[0] << ", " << this->_tau[1] << ", " << this->_tau[2] << " | gd: "
           << this->_gd[0] << ", " << this->_gd[1] << ", " << this->_gd[2] << endl;
     return TotalError();
