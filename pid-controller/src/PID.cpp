@@ -66,11 +66,6 @@ float PID::Steer(){
   return steer;
 }
 
-void PID::Restart(uWS::WebSocket<uWS::SERVER> ws) {
-  std::string reset_msg = "42[\"reset\",{}]";
-  ws.send(reset_msg.data(), reset_msg.length(), uWS::OpCode::TEXT);
-}
-
 float PID::Twiddle(double tol, double rate){
   if (this->do_twiddle == true){
     float total_error = this->total_error/ this->counter; 

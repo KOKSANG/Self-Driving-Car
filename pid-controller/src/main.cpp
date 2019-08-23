@@ -87,8 +87,8 @@ int main() {
         if (event == "telemetry") {
           // j[1] is the data JSON object
           double cte = std::stod(j[1]["cte"].get<string>());
-          double speed = std::stod(j[1]["speed"].get<string>());
-          double angle = std::stod(j[1]["steering_angle"].get<string>());
+          //double speed = std::stod(j[1]["speed"].get<string>());
+          //double angle = std::stod(j[1]["steering_angle"].get<string>());
           double tolerance = 0.8; // tolerance for cte
           double rate = 0.25; // rate for incre or decre gradient descent
           double steer_value, throttle;
@@ -98,15 +98,15 @@ int main() {
            * NOTE: Feel free to play around with the throttle and speed.
            *   Maybe use another PID controller to control the speed!
            */
-          std::cout << "-----------------------------" << std::endl;
+
           pid.UpdateError(cte);
           pid.TotalError();
           steer_value = pid.Twiddle(tolerance, rate);
           throttle = get_throttle(cte, steer_value, tolerance);
           
           // DEBUG
-          std::cout << "CTE: " << cte << " Steering: " << steer_value << " Throttle: " << throttle
-                    << std::endl;
+          //std::cout << "CTE: " << cte << " Steering: " << steer_value << " Throttle: " << throttle
+          //          << std::endl;
 
           pid.counter++;
 
@@ -114,7 +114,7 @@ int main() {
           msgJson["steering_angle"] = steer_value;
           msgJson["throttle"] = throttle;
           auto msg = "42[\"steer\"," + msgJson.dump() + "]";
-          //std::cout << msg << std::endl;
+          std::cout << msg << std::endl;
           ws.send(msg.data(), msg.length(), uWS::OpCode::TEXT);
         }  // end "telemetry" if
       } else {
