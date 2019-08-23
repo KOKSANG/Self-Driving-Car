@@ -35,7 +35,7 @@ string hasData(string s) {
 int main() {
   uWS::Hub h;
 
-  PID pid, pid_throttle;
+  PID pid;
   /**
    * TODO: Initialize the pid variable.
    */
@@ -43,7 +43,6 @@ int main() {
   vector<double> tau = {0.05, 2.0, 0.005};
   vector<double> gd = {0.1, 0.1, 0.1};
   pid.Init(tau, gd, evaluation_steps);
-  pid_throttle.Init(tau, gd, evaluation_steps);
 
   h.onMessage([&pid, &pid_throttle](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length, 
                      uWS::OpCode opCode) {
@@ -74,7 +73,6 @@ int main() {
            */
           std::cout << "-----------------------------" << std::endl;
           pid.UpdateError(cte);
-          pid_throttle.UpdateError(cte);
           steer_value = pid.Twiddle(tolerance, rate);
           throttle = (1 - steer_value)*0.5;
           

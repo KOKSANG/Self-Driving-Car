@@ -62,8 +62,7 @@ class PID {
  private:
   bool do_twiddle;
   int twiddle_timestep;
-  double max_throttle;
-  double min_throttle;
+  double prev_cte;
   float total_error;
 
 };
