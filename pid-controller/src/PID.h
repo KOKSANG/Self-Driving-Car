@@ -51,7 +51,9 @@ class PID {
    * Calculate the total PID error.
    * @output The total PID error
    */
-  float TotalError();
+  void TotalError();
+
+  float Steer();
 
   void Restart(uWS::WebSocket<uWS::SERVER> ws);
 

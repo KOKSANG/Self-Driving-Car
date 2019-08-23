@@ -16,6 +16,33 @@ constexpr double pi() { return M_PI; }
 double deg2rad(double x) { return x * pi() / 180; }
 double rad2deg(double x) { return x * 180 / pi(); }
 
+float get_throttle(double cte, double steer, double tol){
+  float throttle;
+  if (fabs(cte) >= tol){
+    if (fabs(steer) >= tol*0.5){
+    throttle = -1;
+    }
+    else if (fabs(steer) >= tol*0.25){
+      throttle = (1 - fabs(steer))*0.25;
+    }
+    else {
+      throttle = (1 - fabs(steer))*0.4;
+    }
+  }
+  else {
+    if (fabs(steer) >= tol*0.75){
+    throttle = -1;
+    }
+    else if (fabs(steer) >= tol*0.3){
+      throttle = (1 - fabs(steer))*0.5;
+    }
+    else {
+      throttle = (1 - fabs(steer))*0.8;
+    }
+  }
+  return throttle;
+}
+
 // Checks if the SocketIO event has JSON data.
 // If there is data the JSON object in string format will be returned,
 // else the empty string "" will be returned.
@@ -39,9 +66,9 @@ int main() {
   /**
    * TODO: Initialize the pid variable.
    */
-  int evaluation_steps = 1;
-  vector<double> tau = {0.05, 2.0, 0.005};
-  vector<double> gd = {0.1, 0.1, 0.1};
+  int evaluation_steps = 5;
+  vector<double> tau = {0.01, 2.0, 0.005};
+  vector<double> gd = {0.01, 0.1, 0.001};
   pid.Init(tau, gd, evaluation_steps);
 
   h.onMessage([&pid](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length, 
@@ -60,10 +87,10 @@ int main() {
         if (event == "telemetry") {
           // j[1] is the data JSON object
           double cte = std::stod(j[1]["cte"].get<string>());
-          //double speed = std::stod(j[1]["speed"].get<string>());
-          //double angle = std::stod(j[1]["steering_angle"].get<string>());
-          double tolerance = 0.00000001;
-          double rate = 0.1;
+          double speed = std::stod(j[1]["speed"].get<string>());
+          double angle = std::stod(j[1]["steering_angle"].get<string>());
+          double tolerance = 0.8; // tolerance for cte
+          double rate = 0.25; // rate for incre or decre gradient descent
           double steer_value, throttle;
           /**
            * TODO: Calculate steering value here, remember the steering value is
@@ -73,10 +100,10 @@ int main() {
            */
           std::cout << "-----------------------------" << std::endl;
           pid.UpdateError(cte);
+          pid.TotalError();
           steer_value = pid.Twiddle(tolerance, rate);
-          throttle = (1 - fabs(steer_value))*0.5;
+          throttle = get_throttle(cte, steer_value, tolerance);
           
-
           // DEBUG
           std::cout << "CTE: " << cte << " Steering: " << steer_value << " Throttle: " << throttle
                     << std::endl;
@@ -85,7 +112,7 @@ int main() {
 
           json msgJson;
           msgJson["steering_angle"] = steer_value;
-          msgJson["throttle"] = 0.4;
+          msgJson["throttle"] = throttle;
           auto msg = "42[\"steer\"," + msgJson.dump() + "]";
           //std::cout << msg << std::endl;
           ws.send(msg.data(), msg.length(), uWS::OpCode::TEXT);
