@@ -1,124 +1,72 @@
-# Behavioral Cloning Project
-
-[![Udacity - Self-Driving Car NanoDegree](https://s3.amazonaws.com/udacity-sdc/github/shield-carnd.svg)](http://www.udacity.com/drive)
-
-Overview
+# **PID Controller** 
 ---
-This repository contains starting files for the Behavioral Cloning Project.
 
-In this project, you will use what you've learned about deep neural networks and convolutional neural networks to clone driving behavior. You will train, validate and test a model using Keras. The model will output a steering angle to an autonomous vehicle.
+**PID Controller Project**
 
-We have provided a simulator where you can steer a car around a track for data collection. You'll use image data and steering angles to train a neural network and then use this model to drive the car autonomously around the track.
-
-We also want you to create a detailed writeup of the project. Check out the [writeup template](https://github.com/udacity/CarND-Behavioral-Cloning-P3/blob/master/writeup_template.md) for this project and use it as a starting point for creating your own writeup. The writeup can be either a markdown file or a pdf document.
-
-To meet specifications, the project will require submitting five files: 
-* model.py (script used to create and train the model)
-* drive.py (script to drive the car - feel free to modify this file)
-* model.h5 (a trained Keras model)
-* a report writeup file (either markdown or pdf)
-* video.mp4 (a video recording of your vehicle driving autonomously around the track for at least one full lap)
-
-This README file describes how to output the video in the "Details About Files In This Directory" section.
-
-Creating a Great Writeup
----
-A great writeup should include the [rubric points](https://review.udacity.com/#!/rubrics/432/view) as well as your description of how you addressed each point.  You should include a detailed description of the code used (with line-number references and code snippets where necessary), and links to other supporting documents or external references.  You should include images in your writeup to demonstrate how your code works with examples.  
-
-All that said, please be concise!  We're not looking for you to write a book here, just a brief description of how you passed each rubric point, and references to the relevant code :). 
-
-You're not required to use markdown for your writeup.  If you use another method please just submit a pdf of your writeup.
-
-The Project
----
 The goals / steps of this project are the following:
-* Use the simulator to collect data of good driving behavior 
-* Design, train and validate a model that predicts a steering angle from image data
-* Use the model to drive the vehicle autonomously around the first track in the simulator. The vehicle should remain on the road for an entire loop around the track.
+* Build a PID controller to calculate car's steering in simulator
+* Finetune the tau and descent value of the controller
+* Experiment effects of P, I and D on steering values.
+* Test it out so that the car drives around track successfully
 * Summarize the results with a written report
 
-### Dependencies
-This lab requires:
 
-* [CarND Term1 Starter Kit](https://github.com/udacity/CarND-Term1-Starter-Kit)
+[//]: # (Image References)
 
-The lab enviroment can be created with CarND Term1 Starter Kit. Click [here](https://github.com/udacity/CarND-Term1-Starter-Kit/blob/master/README.md) for the details.
+[image1]: ./images/dist_ori.png "Original Steering Distribution"
+[image2]: ./images/tail_ori.png "Original Data"
+[image3]: ./images/tail_adjusted.png "Adjusted Data"
+[image4]: ./images/dist_adjusted.png "Adjusted Steering Distribution"
+[image5]: ./images/model_summary.png "Model Summary"
+[image6]: ./images/training.png "Training Process"
+[image7]: ./images/loss_visualization.png "Training and Validation Loss Visualization"
+[image8]: ./images/nvidia.png "Model Architecture Visualization"
+[image9]: ./images/center.jpg "Edge (Center Camera Image)"
+[image10]: ./images/left.jpg "Edge (Left Camera Image)"
+[image11]: ./images/right.jpg "Edge (Right Camera Image)"
+[link1]: https://www.stat.umn.edu/arc/yjpower.pdf "Yeo-Johnson Transformation"
 
-The following resources can be found in this github repository:
-* drive.py
-* video.py
-* writeup_template.md
+## Rubric Points
+### Here I will consider the [rubric points](https://review.udacity.com/#!/rubrics/1972/view) individually and describe how I addressed each point in my implementation.  
 
-The simulator can be downloaded from the classroom. In the classroom, we have also provided sample data that you can optionally use to help train your model.
+---
 
-## Details About Files In This Directory
+#### 1. Code should compile
 
-### `drive.py`
+My project has a run.sh script. Just run it to compile and run the code. It should run with problem.
 
-Usage of `drive.py` requires you have saved the trained model as an h5 file, i.e. `model.h5`. See the [Keras documentation](https://keras.io/getting-started/faq/#how-can-i-save-a-keras-model) for how to create this file using the following command:
-```sh
-model.save(filepath)
-```
 
-Once the model has been saved, it can be used with drive.py using this command:
+#### 2. PID procedure follows what was taught in lessons
 
-```sh
-python drive.py model.h5
-```
+P, I and D controller are implemented according to what was taught in lessons. Hyperparameter is also optimized with twiddle.
 
-The above command will load the trained model and use the model to make predictions on individual images in real-time and send the predicted angle back to the server via a websocket connection.
 
-Note: There is known local system's setting issue with replacing "," with "." when using drive.py. When this happens it can make predicted steering values clipped to max/min values. If this occurs, a known fix for this is to add "export LANG=en_US.utf8" to the bashrc file.
+#### 3. Describe effects of P, I and D
 
-#### Saving a video of the autonomous agent
+* P tends to make the car swings. Higher the P, harder the swinging is. With P = 0, the car is not able to react to high gradient change of CTE.
 
-```sh
-python drive.py model.h5 run1
-```
+![alt text]
 
-The fourth argument, `run1`, is the directory in which to save the images seen by the agent. If the directory already exists, it'll be overwritten.
 
-```sh
-ls run1
+* D tends to make the car drives calmly. Higher the D, the car converges to a point faster. With D = 0, the car is not able to stay on a lateral point for too long.
 
-[2017-01-09 16:10:23 EST]  12KiB 2017_01_09_21_10_23_424.jpg
-[2017-01-09 16:10:23 EST]  12KiB 2017_01_09_21_10_23_451.jpg
-[2017-01-09 16:10:23 EST]  12KiB 2017_01_09_21_10_23_477.jpg
-[2017-01-09 16:10:23 EST]  12KiB 2017_01_09_21_10_23_528.jpg
-[2017-01-09 16:10:23 EST]  12KiB 2017_01_09_21_10_23_573.jpg
-[2017-01-09 16:10:23 EST]  12KiB 2017_01_09_21_10_23_618.jpg
-[2017-01-09 16:10:23 EST]  12KiB 2017_01_09_21_10_23_697.jpg
-[2017-01-09 16:10:23 EST]  12KiB 2017_01_09_21_10_23_723.jpg
-[2017-01-09 16:10:23 EST]  12KiB 2017_01_09_21_10_23_749.jpg
-[2017-01-09 16:10:23 EST]  12KiB 2017_01_09_21_10_23_817.jpg
-...
-```
+![alt text]
 
-The image file name is a timestamp of when the image was seen. This information is used by `video.py` to create a chronological video of the agent driving.
 
-### `video.py`
+* I tends to make the car converges to central of road. Higher I, makes the car easily to get to central. With I = 0, the car is not able to converge to central.
 
-```sh
-python video.py run1
-```
+![alt text]
 
-Creates a video based on images found in the `run1` directory. The name of the video will be the name of the directory followed by `'.mp4'`, so, in this case the video will be `run1.mp4`.
 
-Optionally, one can specify the FPS (frames per second) of the video:
+#### 4. Describe how hyperparameters were chosen
 
-```sh
-python video.py run1 --fps 48
-```
+* For inital hyperparameters, they are all optimized manually until the car is able to drive nicely at the start and also based on the twiddle values.
+* As for final hyperparameters, they are done using twiddle which computes a descent of previous values based on the total CTE and current CTE.
+* The twiddle function can be found in PID.cpp (line 69)
 
-Will run the video at 48 FPS. The default FPS is 60.
+![alt text][image5]
 
-#### Why create a video
 
-1. It's been noted the simulator might perform differently based on the hardware. So if your model drives succesfully on your machine it might not on another machine (your reviewer). Saving a video is a solid backup in case this happens.
-2. You could slightly alter the code in `drive.py` and/or `video.py` to create a video of what your model sees after the image is processed (may be helpful for debugging).
+#### 5. The car must drive at least a lap succcessfully
 
-### Tips
-- Please keep in mind that training images are loaded in BGR colorspace using cv2 while drive.py load images in RGB to predict the steering angles.
-
-## How to write a README
-A well written README file can enhance your project and portfolio.  Develop your abilities to create professional README files by completing [this free course](https://www.udacity.com/course/writing-readmes--ud777).
+The car has been tested and validated to drive around the track for multiple laps.
