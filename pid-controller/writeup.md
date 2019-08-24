@@ -55,8 +55,6 @@ P, I and D controller are implemented according to what was taught in lessons. H
 * As for final hyperparameters, they are done using twiddle which computes a descent of previous values based on the total CTE and current CTE.
 * The twiddle function can be found in PID.cpp (line 69)
 
-![alt text][image5]
-
 
 #### 5. The car must drive at least a lap succcessfully
 
