@@ -34,10 +34,10 @@ float get_throttle(double cte, double steer, double tol){
     throttle = -1;
     }
     else if (fabs(steer) >= tol*0.3){
-      throttle = (1 - fabs(steer))*0.5;
+      throttle = (1 - fabs(steer))*0.4;
     }
     else {
-      throttle = (1 - fabs(steer))*0.8;
+      throttle = (1 - fabs(steer))*0.7;
     }
   }
   return throttle;
@@ -66,8 +66,10 @@ int main() {
   /**
    * TODO: Initialize the pid variable.
    */
-  int evaluation_steps = 5;
-  vector<double> tau = {0.01, 2.0, 0.005};
+  int evaluation_steps = 50;
+  //vector<double> tau = {0.01, 2.0, 0};
+  //vector<double> gd = {0.01, 0.1, 0};
+  vector<double> tau = {0.05, 2.0, 0.005};
   vector<double> gd = {0.01, 0.1, 0.001};
   pid.Init(tau, gd, evaluation_steps);
 
@@ -89,8 +91,8 @@ int main() {
           double cte = std::stod(j[1]["cte"].get<string>());
           //double speed = std::stod(j[1]["speed"].get<string>());
           //double angle = std::stod(j[1]["steering_angle"].get<string>());
-          double tolerance = 0.8; // tolerance for cte
-          double rate = 0.25; // rate for incre or decre gradient descent
+          double tolerance = 0.7; // tolerance for cte
+          double rate = 0.1; // rate for incre or decre gradient descent
           double steer_value, throttle;
           /**
            * TODO: Calculate steering value here, remember the steering value is
