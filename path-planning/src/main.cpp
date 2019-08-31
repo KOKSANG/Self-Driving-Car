@@ -27,7 +27,7 @@ using namespace Eigen;
 
 /* CONSTANTS defined over here */
 // max speed limit in miles per sec
-double ref_vel = 49.5;
+double ref_vel = 0;
 int lane = 1;
 
 double distance_spacing;
@@ -160,14 +160,31 @@ int main() {
             points_x.push_back(ref_x);
             points_y.push_back(prev_ref_y);
             points_y.push_back(ref_y);
-            
+
             // Initialize state with previous final lane and id
             state = State("KL", 1);
             //state = State(prev_traj.state->id, prev_traj.state->final_lane);
           }
+          // Transform sensor fusion into vehicle object
+          // and classify them according to their position in the ego car coordinate system, front, back, left or right
+          vector<Vehicle> surrounding_vehicles;
+          for (int i = 0; i < sensor_fusion.size(); i++){
+            int id = sensor_fusion[i][0];
+            double x = sensor_fusion[i][1];
+            double y = sensor_fusion[i][2];
+            double vx = sensor_fusion[i][3];
+            double vy = sensor_fusion[i][4];
+            double s = sensor_fusion[i][5];
+            double d = sensor_fusion[i][6];
+            surrounding_vehicles.push_back(Vehicle(id, x, y, vx, vy, s, d, &map));
+          }
+          ref_vel += 0.224;
+          Vehicle ego = Vehicle(000, ref_x, ref_y, car_s, car_d, ref_yaw, car_speed, previous_path_x, previous_path_y, surrounding_vehicles, &state, &map);
+          Behaviour planner = Behaviour(&ego, ref_vel);
 
-          Vehicle ego = Vehicle(000, ref_x, ref_y, car_s, car_d, ref_yaw, car_speed, previous_path_x, previous_path_y, &state, &map);
+          vector<Trajectory> traj = planner.generate_trajectory(points_x, points_y);
 
+          /*
           // Add Frenet of evenly spaced 30m
           vector<double> next_wp0 = map.getXY(car_s + 30, car_d);
           vector<double> next_wp1 = map.getXY(car_s + 60, car_d);
@@ -222,21 +239,10 @@ int main() {
             next_x_vals.push_back(x_point);
             next_y_vals.push_back(y_point); 
           }
+          */
+          next_x_vals = traj[0].points_x;
+          next_y_vals = traj[0].points_y;
 
-          // Transform sensor fusion into vehicle object
-          // and classify them according to their position in the ego car coordinate system, front, back, left or right
-          vector<Vehicle> surrounding_vehicles;
-          for (int i = 0; i < sensor_fusion.size(); i++){
-            int id = sensor_fusion[i][0];
-            double x = sensor_fusion[i][1];
-            double y = sensor_fusion[i][2];
-            double vx = sensor_fusion[i][3];
-            double vy = sensor_fusion[i][4];
-            double s = sensor_fusion[i][5];
-            double d = sensor_fusion[i][6];
-            Vehicle v = Vehicle(id, x, y, vx, vy, s, d, &map);
-            surrounding_vehicles.push_back(v);
-          }
           distance_spacing = 0.224;
           
           msgJson["next_x"] = next_x_vals;

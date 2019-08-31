@@ -38,17 +38,22 @@ class State {
 class Behaviour {
     public:
         Vehicle* ego;
+        State* state;
+        Mapping* map;
         double ref_vel;
         int current_timestep;
+        vector<State> next_states;
         vector<State> states;
 
         Behaviour();
+        Behaviour(Vehicle* ego);
         Behaviour(Vehicle* ego, double ref_vel);
 
         virtual ~Behaviour();
 
         vector<State> available_states();
-        vector<Trajectory> generate_trajectory(vector<double> x, vector<double> y);
+        vector<vector<double>> forecast_points(State* state, vector<double> points_x, vector<double> points_y);
+        vector<Trajectory> generate_trajectory(vector<double> points_x, vector<double> points_y);
         Trajectory get_best_trajectory(vector<Trajectory> trajectories, vector<Vehicle> const surrounding_vehicles);
 };
 

@@ -23,20 +23,20 @@ class Trajectory {
          */
         State* state;
         Vehicle* ego;
+        tk::spline spline;
+        double ref_vel;
+        double target_x;
+        double target_y;
+        double target_distance;
         double time_to_complete;
-        vector<double> start;
-        vector<double> target;
-        vector<vector<double>> jmt;
-        vector<vector<double>> kinematics_s;
-        vector<vector<double>> kinematics_d;
-
+        double step_to_complete;
+        vector<double> points_x;
+        vector<double> points_y;
 
         Trajectory();
-        //Trajectory(vector<double> x, vector<double> y, vector<double> s, vector<double> s_d, vector<double> s_dd,
-        //            vector<double> d, vector<double> d_d, vector<double> d_dd, vector<double> yaw, vector<double> target);
-        Trajectory(State* state, Vehicle* ego, vector<double> start, vector<double> target, vector<double> x, vector<double> y, double time_to_complete);
+        Trajectory(Vehicle* ego, tk::spline s, vector<double> target_xy, double target_distance, double ref_vel, double time_to_complete);
 
-        void generate();
+        void generate(vector<double> prev_x, vector<double> prev_y);
         float cost(vector<vector<Vehicle>> surroundings);
 
         virtual ~Trajectory();

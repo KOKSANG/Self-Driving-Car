@@ -43,6 +43,8 @@ constexpr double pi() { return M_PI; }
 double deg2rad(double x) { return x * pi() / 180; }
 double rad2deg(double x) { return x * 180 / pi(); }
 float sigmoid(float x) { return 1/ (1 + exp(-x)); }
+double miles2m(int miles){ return miles*0.44704; }
+double m2miles(int m){ return m*2.24; }
 
 int d2lane(double d){
     double new_d = d/ LANE_WIDTH;

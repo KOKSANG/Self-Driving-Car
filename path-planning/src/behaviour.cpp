@@ -31,10 +31,10 @@ State::State(string id, int lane){
     if ((this->id == "KL") || (this->id == "RDY")){
         this->intended_lane = this->current_lane;
         this->final_lane = this->current_lane;
-        this->time_ahead = 1;
+        this->time_ahead = KEEP_LANE_CHANGE_TIME;
     }
     else if ((this->id != "PLCL") || (this->id != "PLCR")){
-        this->time_ahead = 1;
+        this->time_ahead = KEEP_LANE_CHANGE_TIME;
         this->final_lane = this->current_lane;
         if (this->id == "PLCL"){
             this->intended_lane = this->current_lane - 1;
@@ -62,87 +62,93 @@ Behaviour::Behaviour(){}
 Behaviour::Behaviour(Vehicle* ego, double ref_vel){
     this->ego = ego;
     this->ref_vel = ref_vel;
+    this->state = ego->state;
     this->current_timestep = 0;
-    vector<State> states;
-    vector<string> states_id;
-    states.push_back(State("RDY", this->ego->lane));
-    states.push_back(State("KL", this->ego->lane));
-    states.push_back(State("PLCL", this->ego->lane));
-    states.push_back(State("PLCR", this->ego->lane));
-    states.push_back(State("LCL", this->ego->lane));
-    states.push_back(State("LCR", this->ego->lane));
-    this->states = states;
 }
-
 // states machine
 vector<State> Behaviour::available_states(){
     vector<State> states;
-    State current_state = *this->ego->state;
+    State* current_state = this->ego->state;
 
-    if (current_state.id == "RDY"){
-        states = {this->states[0], this->states[1]};
+    if (current_state->id == "RDY"){ 
+        states = {State("RDY", this->ego->lane), State("KL", this->ego->lane)};
     }
-    else if ((current_state.id == "KL")){
-        states = {this->states[1], this->states[2], this->states[3]};
+    else if ((current_state->id == "KL")){ 
+        states = {State("KL", this->ego->lane), State("PLCL", this->ego->lane), State("PLCR", this->ego->lane)};
     }
-    else if (current_state.id == "PLCL"){
-        if (this->ego->lane > 0){ states = {this->states[1], this->states[2], this->states[4]}; }
-        else if (this->ego->lane == 0){ states = {this->states[1], this->states[3]}; }
+    else if (current_state->id == "PLCL"){
+        if (this->ego->lane > 0){ states = {State("KL", this->ego->lane), State("PLCL", this->ego->lane), State("LCL", this->ego->lane)}; }
+        else if (this->ego->lane == 0){ states = {State("KL", this->ego->lane), State("PLCR", this->ego->lane)}; }
     }
-    else if (current_state.id == "PLCR"){
-        if (this->ego->lane < 2){ states = {this->states[1], this->states[3], this->states[5]}; }
-        else if (this->ego->lane == 2){ states = {this->states[1], states[2]}; }
+    else if (current_state->id == "PLCR"){
+        if (this->ego->lane < 2){ states = {State("KL", this->ego->lane), State("PLCR", this->ego->lane), State("LCR", this->ego->lane)}; }
+        else if (this->ego->lane == 2){ states = {State("KL", this->ego->lane), State("PLCL", this->ego->lane)}; }
     }
-    else if ((current_state.id == "LCL") || (current_state.id == "LCR")){
-        states = {this->states[1], this->states[2], this->states[3]};
+    else if ((current_state->id == "LCL") || (current_state->id == "LCR")){
+        states = {State("KL", this->ego->lane), State("PLCL", this->ego->lane), State("PLCR", this->ego->lane)};
     }
+
     return states;
 }
 
-vector<Trajectory> Behaviour::generate_trajectory(vector<double> x, vector<double> y){
-    // To get available states of current state
-    vector<State> states = available_states();
-    vector<Trajectory> trajectories;
-    Trajectory trajectory;
-    // start conditions
-    vector<double> k = this->ego->kinematics;
-    vector<double> start = {k[0], k[1], k[2], k[3], k[4], k[5]};
-    // To generate max number of trajectories up to 3 using different acceleration
-    vector<double> different_acc = {MAX_ACCELERATION, 0, -MAX_ACCELERATION};
-    // Making kinematics of ego
-    vector<double> ego_kinematics = {start[0], start[1], start[2]};
-    vector<double> target;
-    vector<vector<double>> kinematics_s, kinematics_d;
-    double target_s, target_sd, target_sdd;
-
-    cout << "[    STATE    ] - Current state: " << this->ego->state->id << " | Lane: " << this->ego->state->current_lane;
-    cout << " | Next state: ";
-    for (int i=0; i<states.size(); i++){ cout << states[i].id << " "; }
-    cout << endl;
-    
-    for (auto& next_state: states){
-        // Intended lane of the state
-        double final_d = lane2d(next_state.final_lane);
-        // Get the remaining time to complete for the trajectory
-        double time_to_complete = (next_state.time_ahead*MAX_POINTS_PER_SEC - x.size())*PATH_TIMESTEP;
-        for (auto& acc: different_acc){
-            // To estimate future/ final kinematics of ego if it travels with this certain acceleration
-            //target_s = calculate_final_kinematics(ego_kinematics, acc, next_state.time_ahead*MAX_POINTS_PER_SEC*PATH_TIMESTEP);
-
-            target_sd = ego_kinematics[1] + acc*next_state.time_ahead;
-            target_sdd = 0;
-            target_s = ego_kinematics[0] + ((ego_kinematics[1] + target_sd)/2)*next_state.time_ahead;
-            // Target conditions
-            target = {target_s, target_sd, target_sdd, final_d, 0, 0};
-            // Create new trajectory object
-            trajectory = Trajectory(&next_state, this->ego, start, target, x, y, time_to_complete);
-            trajectory.generate();
-            trajectories.push_back(trajectory);
-        }
+vector<vector<double>> Behaviour::forecast_points(State* state, vector<double> points_x, vector<double> points_y){
+    int lane = state->intended_lane;
+    double buffer_1 = BUFFER_RANGE;
+    double buffer_2 = 2.0*BUFFER_RANGE;
+    double buffer_3 = 3.0*BUFFER_RANGE;
+    // Add Frenet of evenly spaced 30m
+    vector<double> next_wp0 = this->map->getXY(this->ego->s + buffer_1, this->ego->d);
+    vector<double> next_wp1 = this->map->getXY(this->ego->s + buffer_2, this->ego->d);
+    vector<double> next_wp2 = this->map->getXY(this->ego->s + buffer_3, this->ego->d);
+    // push net waypoints x
+    points_x.push_back(next_wp0[0]);
+    points_x.push_back(next_wp1[0]);
+    points_x.push_back(next_wp2[0]);
+    // push net waypoints y
+    points_y.push_back(next_wp0[1]);
+    points_y.push_back(next_wp1[1]);
+    points_y.push_back(next_wp2[1]);
+    // Shifting
+    for (unsigned int i=0; i < points_x.size(); i++){
+        // shift car reference angle to 0 degrees
+        double shift_x = points_x[i] - this->ego->x;
+        double shift_y = points_y[i] - this->ego->y;
+        points_x[i] = shift_x*cos(0 - this->ego->yaw) - shift_y*sin(0 - this->ego->yaw);
+        points_y[i] = shift_x*sin(0 - this->ego->yaw) + shift_y*cos(0 - this->ego->yaw);
     }
-    return trajectories;
+    return {points_x, points_y};
 }
 
+vector<Trajectory> Behaviour::generate_trajectory(vector<double> points_x, vector<double> points_y){
+    vector<State> next_states = available_states();
+    next_states = {State("KL", this->ego->lane)};
+    vector<double> ptsx, ptsy;
+    vector<vector<double>> points;
+    vector<Trajectory> trajectories;
+    Trajectory trajectory;
+
+    for (auto& state: next_states){
+        points = forecast_points(&state, points_x, points_y);
+        ptsx = points[0];
+        ptsy = points[1];
+        tk::spline s;
+        s.set_points(ptsx, ptsy);
+        // Calculate how to break up spline points
+        double target_x = 30.0;
+        double target_y = s(target_x);
+        double target_dist = sqrt(pow(target_x, 2)+pow(target_y, 2));
+        double time_ahead = KEEP_LANE_CHANGE_TIME;
+        if (state.id != "KL" && state.id != "RDY"){
+            time_ahead = MAX_LANE_CHANGE_TIME;
+        }
+        double time_to_complete = time_ahead - this->ego->prev_x.size()*UPDATE_STEP_TIME;
+        trajectory = Trajectory(this->ego, s, {target_x, target_y}, target_dist, this->ref_vel, time_to_complete);
+        return {trajectory};
+    }
+
+}
+
+/*
 Trajectory Behaviour::get_best_trajectory(vector<Trajectory> trajectories, vector<Vehicle> const surrounding_vehicles){
     // Get sensor fusions and classify them into cars ahead, behind, left or right
     vector<vector<Vehicle>> surroundings;
@@ -163,6 +169,6 @@ Trajectory Behaviour::get_best_trajectory(vector<Trajectory> trajectories, vecto
     cout << ", Velocity: " << trajectories[best].target[1] << ", Acceleration: " << trajectories[best].target[2] << endl;
     return trajectories[best];
 }
-
+*/
 
 Behaviour::~Behaviour(){}

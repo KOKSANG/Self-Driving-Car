@@ -28,8 +28,8 @@ class Vehicle {
         double theta;
         vector<double> kinematics;
 
-        vector<double> points_x;
-        vector<double> points_y;
+        vector<double> prev_x;
+        vector<double> prev_y;
 
         vector<Vehicle> vehicles_ahead;
         vector<Vehicle> vehicles_behind;
@@ -41,10 +41,8 @@ class Vehicle {
 
         Vehicle();
         Vehicle(int id, double x, double y, double vx, double vy, double s, double d, Mapping* map);
-        Vehicle(int id, double x, double y, double vx, double vy, double s, double d, double yaw, double speed,
-                vector<double> kinematics, State* state, Mapping* map);
         Vehicle(int id, double x, double y, double s, double d, double yaw, double speed, 
-                vector<double> points_x, vector<double> points_y, vector<Vehicle> surroundings, State* state, Mapping* map);
+                vector<double> prev_x, vector<double> prev_y, vector<Vehicle> surroundings, State* state, Mapping* map);
 
         virtual ~Vehicle();
 
