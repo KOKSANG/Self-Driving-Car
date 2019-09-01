@@ -28,28 +28,32 @@ State::State(string id, int lane){
     this->current_lane = lane;
 
     if (this->id.compare(KL)==0 || this->id.compare(RDY)==0){
-        this->intended_lane = lane;
-        this->final_lane = lane;
+        this->intended_lane = this->current_lane;
+        this->final_lane = this->intended_lane;
         this->time_ahead = KEEP_LANE_CHANGE_TIME;
     }
     else if (this->id.compare(PLCL)==0){
-        this->intended_lane = lane - 1;
-        this->final_lane = lane;
+        if (this->current_lane - 1 <= 0) this->current_lane = 1;
+        this->intended_lane = this->current_lane - 1;
+        this->final_lane = this->current_lane;
         this->time_ahead = KEEP_LANE_CHANGE_TIME;
     }
     else if (this->id.compare(PLCR)==0){
-        this->intended_lane = lane + 1;
-        this->final_lane = lane;
+        if (this->current_lane - 1 >= 2) this->current_lane = 1;
+        this->intended_lane = this->current_lane + 1;
+        this->final_lane = this->current_lane;
         this->time_ahead = KEEP_LANE_CHANGE_TIME;
     }
     else if (this->id.compare(LCL)==0){
-        this->intended_lane = lane - 1;
-        this->final_lane = lane - 1;
+        if (this->current_lane - 1 <= 0) this->current_lane = 1;
+        this->intended_lane = this->current_lane - 1;
+        this->final_lane = this->intended_lane;
         this->time_ahead = MAX_LANE_CHANGE_TIME;
     }
     else if (this->id.compare(LCR)==0){
-        this->intended_lane = lane + 1;
-        this->final_lane = lane + 1;
+        if (this->current_lane - 1 >= 2) this->current_lane = 1;
+        this->intended_lane = this->current_lane + 1;
+        this->final_lane = this->intended_lane;
         this->time_ahead = MAX_LANE_CHANGE_TIME;
     }
 }
@@ -69,19 +73,24 @@ Behaviour::Behaviour(Vehicle* ego, double ref_vel){
 vector<State> Behaviour::available_states(){
     vector<State> states;
     State* current_state = this->ego->state;
+    string RDY("RDY"), KL("KL"), PLCL("PLCL"), PLCR("PLCR"), LCL("LCL"), LCR("LCR");
 
-    if (current_state->id == "RDY") states = {State("RDY", this->ego->lane), State("KL", this->ego->lane)};
-    else if ((current_state->id == "KL")) states = {State("KL", this->ego->lane), State("PLCL", this->ego->lane), State("PLCR", this->ego->lane)};
-    else if (current_state->id == "PLCL"){
-        if (this->ego->lane > 0) states = {State("KL", this->ego->lane), State("PLCL", this->ego->lane), State("LCL", this->ego->lane)};
+    if (current_state->id.compare(RDY)==0) states = {State("RDY", this->ego->lane), State("KL", this->ego->lane)};
+    else if ((current_state->id.compare(KL)==0)){
+        if (this->ego->lane == 0) states = {State("KL", this->ego->lane), State("PLCR", this->ego->lane)};
+        else if (this->ego->lane == 2) states = {State("KL", this->ego->lane), State("PLCL", this->ego->lane)};
+        else states = {State("KL", this->ego->lane), State("PLCL", this->ego->lane), State("PLCR", this->ego->lane)};
+    }
+    else if (current_state->id.compare(PLCL)==0){
+        if (this->ego->lane != 0) states = {State("KL", this->ego->lane), State("PLCL", this->ego->lane), State("LCL", this->ego->lane)};
         else if (this->ego->lane == 0) states = {State("KL", this->ego->lane), State("PLCR", this->ego->lane)};
     }
-    else if (current_state->id == "PLCR"){
-        if (this->ego->lane < 2) states = {State("KL", this->ego->lane), State("PLCR", this->ego->lane), State("LCR", this->ego->lane)};
+    else if (current_state->id.compare(PLCR)==0){
+        if (this->ego->lane != 2) states = {State("KL", this->ego->lane), State("PLCR", this->ego->lane), State("LCR", this->ego->lane)};
         else if (this->ego->lane == 2) states = {State("KL", this->ego->lane), State("PLCL", this->ego->lane)};
     }
-    else if (current_state->id == "LCL") states = {State("KL", this->ego->lane)};
-    else if (current_state->id == "LCR") states = {State("KL", this->ego->lane)};
+    else if (current_state->id.compare(LCL)==0) states = {State("KL", this->ego->lane), State("LCL", this->ego->lane)};
+    else if (current_state->id.compare(LCR)==0) states = {State("KL", this->ego->lane), State("LCR", this->ego->lane)};
     
     return states;
 }
@@ -126,8 +135,8 @@ Trajectory Behaviour::get_best_trajectory(vector<double> points_x, vector<double
     Trajectory best_trajectory;
     float cost = numeric_limits<float>::max();
 
-    for (auto& state: next_states){
-        cout << "[   STATE   ] >>>>>>> id: " << state.id << ", current lane: " << state.current_lane << ", intended: " << state.intended_lane << ", final: " << state.final_lane << endl; 
+    for (auto& state: next_states){ 
+        cout << "[   STATE   ] >>>>>>> id: " << state.id << ", current lane: " << state.current_lane << ", intended: " << state.intended_lane << ", final: " << state.final_lane << endl;
         points = forecast_points(&state, points_x, points_y);
         ptsx = points[0];
         ptsy = points[1];
@@ -139,7 +148,7 @@ Trajectory Behaviour::get_best_trajectory(vector<double> points_x, vector<double
         double target_dist = sqrt(pow(target_x, 2)+pow(target_y, 2));
         double time_ahead = state.time_ahead;
         double time_to_complete = time_ahead - this->ego->prev_x.size()*UPDATE_STEP_TIME;
-
+        
         for (double& target_acc: next_acc){
             double prev_vel = this->ref_vel;
             trajectory = Trajectory(this->ego, &state, spline, {target_x, target_y, target_dist, target_acc}, this->ref_vel, time_to_complete);
