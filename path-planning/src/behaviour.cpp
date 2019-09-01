@@ -140,11 +140,6 @@ Trajectory Behaviour::get_best_trajectory(vector<double> points_x, vector<double
         double time_ahead = state.time_ahead;
         double time_to_complete = time_ahead - this->ego->prev_x.size()*UPDATE_STEP_TIME;
 
-        if (time_to_complete <= 0){
-            time_to_complete = 0;
-            cout << "REALLY GOT ---------------" << endl << endl << endl;;
-        }
-
         for (double& target_acc: next_acc){
             double prev_vel = this->ref_vel;
             trajectory = Trajectory(this->ego, &state, spline, {target_x, target_y, target_dist, target_acc}, this->ref_vel, time_to_complete);
