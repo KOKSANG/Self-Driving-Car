@@ -3,33 +3,11 @@
 #include <utility>
 #include <algorithm>
 #include "vehicle.h"
-#include "behaviour.h"
-#include "mapping.h"
-#include "helpers.h"
+#include "trajectory.h"
 #include "constants.h"
 
 using std::sort;
 using namespace std;
-
-/*
-struct sort_increment {
-    bool operator()(const Vehicle& x, const Vehicle& y) {
-        if (x.s != y.s) {
-            return x.s < y.s;
-        }
-        return x.id < y.id;
-    }
-};
-
-struct sort_decrement {
-    bool operator()(const Vehicle& x, const Vehicle& y) {
-        if (x.s != y.s) {
-            return x.s > y.s;
-        }
-        return x.id > y.id;
-    }
-};
- */
 
 bool Vehicle::sort_distance_to_ego(const Vehicle& left, const Vehicle& right){
     return get_distance(this->x, this->y, left.x, left.y) < get_distance(this->x, this->y, right.x, right.y);
@@ -59,12 +37,12 @@ Vehicle::Vehicle(int id, double x, double y, double vx, double vy, double s, dou
 }
 
 Vehicle::Vehicle(int id, double x, double y, double s, double d, double yaw, double speed,
-                    vector<double> prev_x, vector<double> points_y, vector<Vehicle> surroundings, State* state, Mapping* map){
+                    vector<double> prev_x, vector<double> prev_y, vector<Vehicle> surroundings, State* state, Mapping* map){
     this->id = id;
     this->x = x;
     this->y = y;
     this->s = s;
-    this->d = d;
+    this->d = recalibrate_d(d);
     this->yaw = yaw;
     this->prev_x = prev_x;
     this->prev_y = prev_y;
@@ -79,6 +57,15 @@ Vehicle::Vehicle(int id, double x, double y, double s, double d, double yaw, dou
     this->vehicles_left = sorted_surroundings[2];
     this->vehicles_right = sorted_surroundings[3];
 }
+
+Vehicle::Vehicle(int id, double x, double y, double s, double d, double yaw){
+    this->id = id;
+    this->x = x;
+    this->y = y;
+    this->s = s;
+    this->d = recalibrate_d(d);
+    this->yaw = yaw;
+ }
 
 double Vehicle::get_speed() const {
     return sqrt(this->vx * this->vx + this->vy * this->vy);
@@ -112,6 +99,14 @@ Vehicle Vehicle::predict_position(double t){
     double theta = atan2(new_x - this->y, new_y - this->x);
     vector<double> frenet = this->map->getFrenet(new_x, new_y, theta);
     return Vehicle(this->id, new_x, new_y, this->vx, this->vy, frenet[0], frenet[1], this->map);
+}
+
+Vehicle Vehicle::next_ego(Trajectory* traj){
+    double new_x = traj->points_x.back();
+    double new_y = traj->points_y.back();
+    double theta = atan2(new_x - this->x, new_y - this->y);
+    vector<double> frenet = this->map->getFrenet(new_x, new_y, theta);
+    return Vehicle(this->id, new_x, new_y, frenet[0], frenet[1], theta);
 }
 
 Vehicle::~Vehicle() {}

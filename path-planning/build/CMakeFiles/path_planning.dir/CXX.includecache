@@ -1069,16 +1069,8 @@ vehicle.h
 /home/koksang/Projects/Self-Driving-Car/path-planning/src/vehicle.h
 mapping.h
 /home/koksang/Projects/Self-Driving-Car/path-planning/src/mapping.h
-cost_functions.h
-/home/koksang/Projects/Self-Driving-Car/path-planning/src/cost_functions.h
-jmt.h
-/home/koksang/Projects/Self-Driving-Car/path-planning/src/jmt.h
-helpers.h
-/home/koksang/Projects/Self-Driving-Car/path-planning/src/helpers.h
 constants.h
 /home/koksang/Projects/Self-Driving-Car/path-planning/src/constants.h
-spline.h
-/home/koksang/Projects/Self-Driving-Car/path-planning/src/spline.h
 
 /home/koksang/Projects/Self-Driving-Car/path-planning/src/behaviour.h
 iostream
@@ -1091,12 +1083,8 @@ string
 -
 vector
 -
-helpers.h
-/home/koksang/Projects/Self-Driving-Car/path-planning/src/helpers.h
 constants.h
 /home/koksang/Projects/Self-Driving-Car/path-planning/src/constants.h
-spline.h
-/home/koksang/Projects/Self-Driving-Car/path-planning/src/spline.h
 
 /home/koksang/Projects/Self-Driving-Car/path-planning/src/constants.h
 
@@ -1143,14 +1131,6 @@ mapping.h
 /home/koksang/Projects/Self-Driving-Car/path-planning/src/mapping.h
 constants.h
 /home/koksang/Projects/Self-Driving-Car/path-planning/src/constants.h
-spline.h
-/home/koksang/Projects/Self-Driving-Car/path-planning/src/spline.h
-
-/home/koksang/Projects/Self-Driving-Car/path-planning/src/jmt.h
-vector
--
-Eigen-3.3/Eigen/Dense
-/home/koksang/Projects/Self-Driving-Car/path-planning/src/Eigen-3.3/Eigen/Dense
 
 /home/koksang/Projects/Self-Driving-Car/path-planning/src/json.hpp
 algorithm
@@ -1233,14 +1213,14 @@ behaviour.cpp
 /home/koksang/Projects/Self-Driving-Car/path-planning/src/behaviour.cpp
 trajectory.cpp
 /home/koksang/Projects/Self-Driving-Car/path-planning/src/trajectory.cpp
-jmt.h
-/home/koksang/Projects/Self-Driving-Car/path-planning/src/jmt.h
 helpers.h
 /home/koksang/Projects/Self-Driving-Car/path-planning/src/helpers.h
 constants.h
 /home/koksang/Projects/Self-Driving-Car/path-planning/src/constants.h
 json.hpp
 /home/koksang/Projects/Self-Driving-Car/path-planning/src/json.hpp
+spline.h
+/home/koksang/Projects/Self-Driving-Car/path-planning/src/spline.h
 
 /home/koksang/Projects/Self-Driving-Car/path-planning/src/mapping.cpp
 iostream
@@ -1293,20 +1273,18 @@ string
 -
 vector
 -
+behaviour.h
+/home/koksang/Projects/Self-Driving-Car/path-planning/src/behaviour.h
 trajectory.h
 /home/koksang/Projects/Self-Driving-Car/path-planning/src/trajectory.h
 vehicle.h
 /home/koksang/Projects/Self-Driving-Car/path-planning/src/vehicle.h
-behaviour.h
-/home/koksang/Projects/Self-Driving-Car/path-planning/src/behaviour.h
-jmt.h
-/home/koksang/Projects/Self-Driving-Car/path-planning/src/jmt.h
-helpers.h
-/home/koksang/Projects/Self-Driving-Car/path-planning/src/helpers.h
+mapping.h
+/home/koksang/Projects/Self-Driving-Car/path-planning/src/mapping.h
+cost_functions.h
+/home/koksang/Projects/Self-Driving-Car/path-planning/src/cost_functions.h
 constants.h
 /home/koksang/Projects/Self-Driving-Car/path-planning/src/constants.h
-spline.h
-/home/koksang/Projects/Self-Driving-Car/path-planning/src/spline.h
 
 /home/koksang/Projects/Self-Driving-Car/path-planning/src/trajectory.h
 iostream
@@ -1315,6 +1293,8 @@ vector
 -
 constants.h
 /home/koksang/Projects/Self-Driving-Car/path-planning/src/constants.h
+spline.h
+/home/koksang/Projects/Self-Driving-Car/path-planning/src/spline.h
 
 /home/koksang/Projects/Self-Driving-Car/path-planning/src/vehicle.cpp
 iostream
@@ -1327,12 +1307,8 @@ algorithm
 -
 vehicle.h
 /home/koksang/Projects/Self-Driving-Car/path-planning/src/vehicle.h
-behaviour.h
-/home/koksang/Projects/Self-Driving-Car/path-planning/src/behaviour.h
-mapping.h
-/home/koksang/Projects/Self-Driving-Car/path-planning/src/mapping.h
-helpers.h
-/home/koksang/Projects/Self-Driving-Car/path-planning/src/helpers.h
+trajectory.h
+/home/koksang/Projects/Self-Driving-Car/path-planning/src/trajectory.h
 constants.h
 /home/koksang/Projects/Self-Driving-Car/path-planning/src/constants.h
 
@@ -1341,6 +1317,8 @@ iostream
 -
 vector
 -
+trajectory.h
+/home/koksang/Projects/Self-Driving-Car/path-planning/src/trajectory.h
 constants.h
 /home/koksang/Projects/Self-Driving-Car/path-planning/src/constants.h
 

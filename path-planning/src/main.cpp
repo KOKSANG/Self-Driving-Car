@@ -10,10 +10,10 @@
 #include "vehicle.cpp"
 #include "behaviour.cpp"
 #include "trajectory.cpp"
-#include "jmt.h"
 #include "helpers.h"
 #include "constants.h"
 #include "json.hpp"
+#include "spline.h"
 
 // for convenience
 using nlohmann::json;
@@ -27,14 +27,10 @@ using namespace Eigen;
 
 /* CONSTANTS defined over here */
 // max speed limit in miles per sec
-double ref_vel = 0;
+double ref_vel = 5;
 int lane = 1;
 
-double distance_spacing;
-
-double prev_x, prev_y, car_vx, car_vy, prev_vx, prev_vy, s, s_d, s_dd, d, d_d, d_dd;
-vector<double> prev_speed;
-Trajectory best_trajectory, prev_traj;
+Trajectory best_trajectory;
 State state;
 
 int main() {
@@ -85,7 +81,6 @@ int main() {
     // Interpolating the track points with spline
     double separation = INTERPOLATION_DISTANCE; // in m
     Mapping map = Mapping(map_waypoints_s, map_waypoints_x, map_waypoints_y, map_waypoints_dx, map_waypoints_dy, separation, TRACK_LENGTH);
-    vector<double> kinematics, vx, vy, previous_path_s, previous_path_d;
 
     if (length && length > 2 && data[0] == '4' && data[1] == '2') {
 
@@ -98,7 +93,6 @@ int main() {
 
         if (event == "telemetry") {
           // j[1] is the data JSON object
-
           // Main car's localization Data
           double car_x = j[1]["x"];
           double car_y = j[1]["y"];
@@ -120,35 +114,24 @@ int main() {
           vector<double> next_x_vals;
           vector<double> next_y_vals;
 
-          cout << "=========================================================" << endl;
-          /*
-          cout << "car_x | " << car_x << endl;
-          cout << "car_y | " << car_y << endl;
-          cout << "car_s | " << car_s << endl;
-          cout << "car_d | " << car_d << endl;
-           */
-
           int prev_size = previous_path_x.size();
           vector<double> points_x, points_y;
           double ref_x = car_x;
           double ref_y = car_y;
           double ref_yaw = deg2rad(car_yaw);
+          bool too_close = false;
 
           // If car has just started or in INITIAL STATE
           if (prev_size < 2){
-            // Retrieve previous two x and y coordinates and push into points
-            double prev_ref_x = car_x - cos(car_yaw);
-            double prev_ref_y = car_y - sin(car_yaw);
+            double prev_ref_x = ref_x - cos(car_yaw);
+            double prev_ref_y = ref_y - sin(car_yaw);
             points_x.push_back(prev_ref_x);
             points_x.push_back(ref_x);
             points_y.push_back(prev_ref_y);
             points_y.push_back(ref_y);
-            // Initialize car initial state (READY)
             state = State("RDY", car_lane);
           }
-          // If car has been moving for quite awhile
           else {
-            int size = NUM_OF_PREVIOUS_POINTS;
             ref_x = previous_path_x[prev_size - 1];
             ref_y = previous_path_y[prev_size - 1];
 
@@ -161,10 +144,11 @@ int main() {
             points_y.push_back(prev_ref_y);
             points_y.push_back(ref_y);
 
-            // Initialize state with previous final lane and id
-            state = State("KL", 1);
-            //state = State(prev_traj.state->id, prev_traj.state->final_lane);
+            car_s = end_path_s;
           }
+
+          cout << "============================================================= | Current state: " << state.id << endl;
+
           // Transform sensor fusion into vehicle object
           // and classify them according to their position in the ego car coordinate system, front, back, left or right
           vector<Vehicle> surrounding_vehicles;
@@ -178,72 +162,18 @@ int main() {
             double d = sensor_fusion[i][6];
             surrounding_vehicles.push_back(Vehicle(id, x, y, vx, vy, s, d, &map));
           }
-          ref_vel += 0.224;
+
           Vehicle ego = Vehicle(000, ref_x, ref_y, car_s, car_d, ref_yaw, car_speed, previous_path_x, previous_path_y, surrounding_vehicles, &state, &map);
           Behaviour planner = Behaviour(&ego, ref_vel);
+          Trajectory traj = planner.get_best_trajectory(points_x, points_y);
 
-          vector<Trajectory> traj = planner.generate_trajectory(points_x, points_y);
-
-          /*
-          // Add Frenet of evenly spaced 30m
-          vector<double> next_wp0 = map.getXY(car_s + 30, car_d);
-          vector<double> next_wp1 = map.getXY(car_s + 60, car_d);
-          vector<double> next_wp2 = map.getXY(car_s + 90, car_d);
-          // push net waypoints x
-          points_x.push_back(next_wp0[0]);
-          points_x.push_back(next_wp1[0]);
-          points_x.push_back(next_wp2[0]);
-          // push net waypoints y
-          points_y.push_back(next_wp0[1]);
-          points_y.push_back(next_wp1[1]);
-          points_y.push_back(next_wp2[1]);
-
-          for (unsigned int i=0; i < points_x.size(); i++){
-            // shift car reference angle to 0 degrees
-            double shift_x = points_x[i] - ref_x;
-            double shift_y = points_y[i] - ref_y;
-            points_x[i] = shift_x*cos(0 - ref_yaw) - shift_y*sin(0 - ref_yaw);
-            points_y[i] = shift_x*sin(0 - ref_yaw) + shift_y*cos(0 - ref_yaw);
-          }
-
-          tk::spline s;
-          s.set_points(points_x, points_y);
-
-          for (int i=0; i < previous_path_x.size(); i++){
-            next_x_vals.push_back(previous_path_x[i]);
-            next_y_vals.push_back(previous_path_y[i]);
-          }
-
-          // Calculate how to break up spline points
-          double target_x = 30.0;
-          double target_y = s(target_x);
-          double target_dist = sqrt(pow(target_x, 2)+pow(target_y, 2));
-          double x_add_on = 0;
+          cout << "[ BEST TRAJ ] - ref_vel: " << traj.ref_vel << ", time to complete: " << traj.time_to_complete << ", id: " << traj.state->id << ", lane: " << traj.state->final_lane << ", Acc: " << traj.target_acc << endl;
           
-          for (int i=0; i <= 50-previous_path_x.size(); i++){
-            double N = target_dist/ (0.02*ref_vel*0.44704);
-            double x_point = x_add_on + target_x/ N;
-            double y_point = s(x_point);
+          ref_vel = traj.ref_vel;
+          state = *traj.state;
 
-            x_add_on = x_point;
-
-            double x_ref = x_point;
-            double y_ref = y_point;
-
-            x_point = x_ref*cos(ref_yaw) - y_ref*sin(ref_yaw);
-            y_point = x_ref*sin(ref_yaw) + y_ref*cos(ref_yaw);
-
-            x_point += ref_x;
-            y_point += ref_y;
-
-            next_x_vals.push_back(x_point);
-            next_y_vals.push_back(y_point); 
-          }
-          */
-          next_x_vals = traj[0].points_x;
-          next_y_vals = traj[0].points_y;
-
-          distance_spacing = 0.224;
+          next_x_vals = traj.points_x;
+          next_y_vals = traj.points_y;
           
           msgJson["next_x"] = next_x_vals;
           msgJson["next_y"] = next_y_vals;

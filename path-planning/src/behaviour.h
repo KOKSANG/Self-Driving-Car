@@ -6,9 +6,7 @@
 #include <math.h>
 #include <string>
 #include <vector>
-#include "helpers.h"
 #include "constants.h"
-#include "spline.h"
 
 // for convenience
 using std::string;
@@ -43,7 +41,6 @@ class Behaviour {
         double ref_vel;
         int current_timestep;
         vector<State> next_states;
-        vector<State> states;
 
         Behaviour();
         Behaviour(Vehicle* ego);
@@ -53,8 +50,7 @@ class Behaviour {
 
         vector<State> available_states();
         vector<vector<double>> forecast_points(State* state, vector<double> points_x, vector<double> points_y);
-        vector<Trajectory> generate_trajectory(vector<double> points_x, vector<double> points_y);
-        Trajectory get_best_trajectory(vector<Trajectory> trajectories, vector<Vehicle> const surrounding_vehicles);
+        Trajectory get_best_trajectory(vector<double> points_x, vector<double> points_y);
 };
 
 #endif

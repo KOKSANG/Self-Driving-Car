@@ -2,6 +2,7 @@
 #define VEHICLE_H
 #include <iostream>
 #include <vector>
+#include "trajectory.h"
 #include "constants.h"
 
 class State;
@@ -43,11 +44,14 @@ class Vehicle {
         Vehicle(int id, double x, double y, double vx, double vy, double s, double d, Mapping* map);
         Vehicle(int id, double x, double y, double s, double d, double yaw, double speed, 
                 vector<double> prev_x, vector<double> prev_y, vector<Vehicle> surroundings, State* state, Mapping* map);
+        Vehicle(int id, double x, double y, double s, double d, double yaw);
 
         virtual ~Vehicle();
 
         // Returns a new vehicle at the next timestep
         Vehicle predict_position(double t);
+
+        Vehicle next_ego(Trajectory* traj);
 
         vector<Vehicle> ahead(vector<Vehicle> others, double T);
 

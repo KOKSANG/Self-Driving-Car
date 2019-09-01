@@ -8,7 +8,6 @@
 #include <algorithm>
 #include "mapping.h"
 #include "constants.h"
-#include "spline.h"
 
 // for convenience
 using std::cout;
@@ -53,7 +52,7 @@ int d2lane(double d){
     if (new_d < 1){
         lane = 0;
     }
-    else if ((new_d >= 1) && (new_d < 2)){
+    else if ((2 > new_d >= 1)){
         lane = 1;
     }
     else if (new_d >= 2){
