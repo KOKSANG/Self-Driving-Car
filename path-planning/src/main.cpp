@@ -145,6 +145,7 @@ int main() {
             points_y.push_back(ref_y);
 
             car_s = end_path_s;
+            //state = State("KL", 1);
           }
 
           // Transform sensor fusion into vehicle object
@@ -163,7 +164,7 @@ int main() {
 
           Vehicle ego = Vehicle(000, ref_x, ref_y, car_s, car_d, ref_yaw, car_speed, previous_path_x, previous_path_y, surrounding_vehicles, &state, &map);
           cout << endl;
-          cout << "============================================================= | Current state: " << state.id << ", Current lane: " << ego.lane << endl;
+          cout << "============================================================= | Current state: " << state.id << ", Ego s: " << ego.s << endl;
 
           Behaviour planner = Behaviour(&ego, ref_vel);
           Trajectory traj = planner.get_best_trajectory(points_x, points_y);

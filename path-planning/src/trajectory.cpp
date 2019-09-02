@@ -73,9 +73,9 @@ float Trajectory::cost(double prev_vel, double final_vel){
     if (this->state->id != "RDY"){
         float rules_cost = costfunc_Rules(this, prev_vel, final_vel, this->time_to_complete);
         float efficiency_cost = costfunc_Efficiency(this, surroundings);
-        float safety_cost = costfunc_Safety(this, surroundings, this->time_to_complete);
+        float safety_cost = costfunc_Safety(this, &next_ego, surroundings, this->time_to_complete);
         cost = (RULES_COST*rules_cost + EFFICIENCY_COST*efficiency_cost + SAFETY_COST*safety_cost)/ weight;
-        cout << "[COST BRKDWN] - Acc: " << this->target_acc << ", Rules: " << rules_cost << ", Efficiency: " << efficiency_cost << ", Safety: " << safety_cost << ", Sum: " << cost << endl;
+        //cout << "*COST BRKDWN* --> Acc: " << this->target_acc << " | Rules: " << rules_cost << " | Efficiency: " << efficiency_cost << " | Safety: " << safety_cost << " | Sum: " << cost << endl;
     }
     else {
         cost = MAX_COST;

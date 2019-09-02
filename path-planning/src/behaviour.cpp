@@ -33,25 +33,21 @@ State::State(string id, int lane){
         this->time_ahead = KEEP_LANE_CHANGE_TIME;
     }
     else if (this->id.compare(PLCL)==0){
-        if (this->current_lane - 1 <= 0) this->current_lane = 1;
         this->intended_lane = this->current_lane - 1;
         this->final_lane = this->current_lane;
         this->time_ahead = KEEP_LANE_CHANGE_TIME;
     }
     else if (this->id.compare(PLCR)==0){
-        if (this->current_lane - 1 >= 2) this->current_lane = 1;
         this->intended_lane = this->current_lane + 1;
         this->final_lane = this->current_lane;
         this->time_ahead = KEEP_LANE_CHANGE_TIME;
     }
     else if (this->id.compare(LCL)==0){
-        if (this->current_lane - 1 <= 0) this->current_lane = 1;
         this->intended_lane = this->current_lane - 1;
         this->final_lane = this->intended_lane;
         this->time_ahead = MAX_LANE_CHANGE_TIME;
     }
     else if (this->id.compare(LCR)==0){
-        if (this->current_lane - 1 >= 2) this->current_lane = 1;
         this->intended_lane = this->current_lane + 1;
         this->final_lane = this->intended_lane;
         this->time_ahead = MAX_LANE_CHANGE_TIME;
@@ -79,40 +75,54 @@ vector<State> Behaviour::available_states(){
     else if ((current_state->id.compare(KL)==0)){
         if (this->ego->lane == 0) states = {State("KL", this->ego->lane), State("PLCR", this->ego->lane)};
         else if (this->ego->lane == 2) states = {State("KL", this->ego->lane), State("PLCL", this->ego->lane)};
-        else states = {State("KL", this->ego->lane), State("PLCL", this->ego->lane), State("PLCR", this->ego->lane)};
+        else if (this->ego->lane == 1) states = {State("KL", this->ego->lane), State("PLCL", this->ego->lane), State("PLCR", this->ego->lane)};
     }
     else if (current_state->id.compare(PLCL)==0){
-        if (this->ego->lane != 0) states = {State("KL", this->ego->lane), State("PLCL", this->ego->lane), State("LCL", this->ego->lane)};
-        else if (this->ego->lane == 0) states = {State("KL", this->ego->lane), State("PLCR", this->ego->lane)};
+        if (this->ego->lane == 0) states = {State("KL", this->ego->lane), State("PLCR", this->ego->lane)};
+        else if (this->ego->lane != 0) states = {State("KL", this->ego->lane), State("PLCL", this->ego->lane), State("LCL", this->ego->lane)};
     }
     else if (current_state->id.compare(PLCR)==0){
-        if (this->ego->lane != 2) states = {State("KL", this->ego->lane), State("PLCR", this->ego->lane), State("LCR", this->ego->lane)};
-        else if (this->ego->lane == 2) states = {State("KL", this->ego->lane), State("PLCL", this->ego->lane)};
+        if (this->ego->lane == 2) states = {State("KL", this->ego->lane), State("PLCL", this->ego->lane)};
+        else if (this->ego->lane != 2) states = {State("KL", this->ego->lane), State("PLCR", this->ego->lane), State("LCR", this->ego->lane)};
     }
-    else if (current_state->id.compare(LCL)==0) states = {State("KL", this->ego->lane), State("LCL", this->ego->lane)};
-    else if (current_state->id.compare(LCR)==0) states = {State("KL", this->ego->lane), State("LCR", this->ego->lane)};
+    else if (current_state->id.compare(LCL)==0){
+        if (this->ego->lane == 0) states = {State("KL", this->ego->lane)};
+        else if (this->ego->lane != 0) states = {State("KL", this->ego->lane), State("LCL", this->ego->lane)};//, State("PLCL", this->ego->lane)};
+    }
+    else if (current_state->id.compare(LCR)==0){
+        if (this->ego->lane == 2) states = {State("KL", this->ego->lane)};//, State("PLCL", this->ego->lane)};
+        else if (this->ego->lane != 2) states = {State("KL", this->ego->lane), State("LCR", this->ego->lane)};//, State("PLCR", this->ego->lane)};
+    }
     
     return states;
 }
 
 vector<vector<double>> Behaviour::forecast_points(State* state, vector<double> points_x, vector<double> points_y){
     int lane = state->intended_lane;
-    double buffer_1 = BUFFER_RANGE;
-    double buffer_2 = 2.0*BUFFER_RANGE;
-    double buffer_3 = 3.0*BUFFER_RANGE;
+    double buffer_1 = 1.5*BUFFER_RANGE;
+    double buffer_2 = 3.0*BUFFER_RANGE;
+    double buffer_3 = 4.5*BUFFER_RANGE;
+    //double buffer_4 = 4.0*BUFFER_RANGE;
+    //double buffer_5 = 5.0*BUFFER_RANGE;
     double final_d = MIN_D+this->state->final_lane*LANE_WIDTH;
     // Add Frenet of evenly spaced 30m
     vector<double> next_wp0 = this->map->getXY(this->ego->s + buffer_1, final_d);
     vector<double> next_wp1 = this->map->getXY(this->ego->s + buffer_2, final_d);
     vector<double> next_wp2 = this->map->getXY(this->ego->s + buffer_3, final_d);
+    //vector<double> next_wp3 = this->map->getXY(this->ego->s + buffer_4, final_d);
+    //vector<double> next_wp4 = this->map->getXY(this->ego->s + buffer_5, final_d);
     // push net waypoints x
     points_x.push_back(next_wp0[0]);
     points_x.push_back(next_wp1[0]);
     points_x.push_back(next_wp2[0]);
+    //points_x.push_back(next_wp3[0]);
+    //points_x.push_back(next_wp4[0]);
     // push net waypoints y
     points_y.push_back(next_wp0[1]);
     points_y.push_back(next_wp1[1]);
     points_y.push_back(next_wp2[1]);
+    //points_y.push_back(next_wp3[1]);
+    //points_y.push_back(next_wp4[1]);
     // Shifting
     for (unsigned int i=0; i < points_x.size(); i++){
         // shift car reference angle to 0 degrees
@@ -136,7 +146,7 @@ Trajectory Behaviour::get_best_trajectory(vector<double> points_x, vector<double
     float cost = numeric_limits<float>::max();
 
     for (auto& state: next_states){ 
-        cout << "[   STATE   ] >>>>>>> id: " << state.id << ", current lane: " << state.current_lane << ", intended: " << state.intended_lane << ", final: " << state.final_lane << endl;
+        cout << "[   STATE   ] <<<<< id: " << state.id << " | current lane: " << state.current_lane << " | intended: " << state.intended_lane << " | final: " << state.final_lane << " >>>>>" << endl;
         points = forecast_points(&state, points_x, points_y);
         ptsx = points[0];
         ptsy = points[1];
@@ -148,7 +158,7 @@ Trajectory Behaviour::get_best_trajectory(vector<double> points_x, vector<double
         double target_dist = sqrt(pow(target_x, 2)+pow(target_y, 2));
         double time_ahead = state.time_ahead;
         double time_to_complete = time_ahead - this->ego->prev_x.size()*UPDATE_STEP_TIME;
-        
+
         for (double& target_acc: next_acc){
             double prev_vel = this->ref_vel;
             trajectory = Trajectory(this->ego, &state, spline, {target_x, target_y, target_dist, target_acc}, this->ref_vel, time_to_complete);

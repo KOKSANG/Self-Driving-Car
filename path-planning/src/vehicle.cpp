@@ -85,12 +85,16 @@ vector<vector<Vehicle>> Vehicle::sort_vehicles(vector<Vehicle> surroundings){
             else if (v.lane == right_lane) vehicles_right.push_back(v);
         }
     }
-    if (vehicles_ahead.size() > 0) sort(vehicles_ahead.begin(), vehicles_ahead.end(), [this](Vehicle left, Vehicle right){return sort_increment(left, right);});
-    if (vehicles_behind.size() > 0) sort(vehicles_behind.begin(), vehicles_behind.end(), [this](Vehicle left, Vehicle right){return sort_decrement(left, right);});
-    if (vehicles_behind.size() > 0) sort(vehicles_behind.begin(), vehicles_behind.end(), [this](Vehicle left, Vehicle right){return sort_decrement(left, right);});
-    if (vehicles_behind.size() > 0) sort(vehicles_behind.begin(), vehicles_behind.end(), [this](Vehicle left, Vehicle right){return sort_decrement(left, right);});
+    //if (vehicles_ahead.size() > 0) sort(vehicles_ahead.begin(), vehicles_ahead.end(), [this](Vehicle left, Vehicle right){return sort_increment(left, right);});
+    //if (vehicles_behind.size() > 0) sort(vehicles_behind.begin(), vehicles_behind.end(), [this](Vehicle left, Vehicle right){return sort_decrement(left, right);});
+    //if (vehicles_behind.size() > 0) sort(vehicles_behind.begin(), vehicles_behind.end(), [this](Vehicle left, Vehicle right){return sort_decrement(left, right);});
+    //if (vehicles_behind.size() > 0) sort(vehicles_behind.begin(), vehicles_behind.end(), [this](Vehicle left, Vehicle right){return sort_decrement(left, right);});
 
     vector<vector<Vehicle>> sorted_vehicles = {vehicles_ahead, vehicles_behind, vehicles_left, vehicles_right};
+
+    for (auto& vehicles: sorted_vehicles){
+        if (!vehicles.empty()) sort(vehicles.begin(), vehicles.end(), [this](Vehicle left, Vehicle right){ return sort_increment(left, right); });
+    }
 
     return sorted_vehicles;
 }
@@ -104,8 +108,11 @@ Vehicle Vehicle::predict_position(double t){
 }
 
 Vehicle Vehicle::next_ego(Trajectory* traj){
-    double new_x = traj->points_x.back();
-    double new_y = traj->points_y.back();
+    // get previous timestep consumed by calculating the difference of previous size and constant update rate - 50
+    // assuming that the next update will consume the same timestep
+    int time_consumed = CONTROLLER_UPDATE_RATE - this->prev_x.size();
+    double new_x = traj->points_x.at(time_consumed);
+    double new_y = traj->points_y.at(time_consumed);
     double theta = atan2(new_x - this->x, new_y - this->y);
     vector<double> frenet = this->map->getFrenet(new_x, new_y, theta);
     return Vehicle(this->id, new_x, new_y, frenet[0], frenet[1], theta);
