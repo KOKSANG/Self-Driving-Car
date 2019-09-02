@@ -38,7 +38,7 @@ My project has a run.sh script. Just run it to compile and run the code. It shou
 All criteria have been successfully met. The demo video can be found at [DEMO](https://youtu.be/eMWW5sSe0bg)
 
 
-### 4. Reflection
+### 3. Reflection
 
 The general flow of the planner is as shown below,
 
@@ -84,7 +84,7 @@ The planner will get all the next available states, and compare them. Variations
 When the planner calls for trajectory generation function, the trajectory generates all its waypoints using spline. And when cost calculation function is called, the trajectory calculates the total cost based on the cost returned by all cost functions.
 
 
-### 5. Documentation
+### 4. Documentation
 
 #### Here are the documetations for the scripts
 
