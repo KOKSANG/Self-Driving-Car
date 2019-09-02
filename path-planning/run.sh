@@ -1,13 +1,13 @@
 #!/bin/bash
+
 clear
 
 cd `dirname $0`
 rm -rf build
 
 mkdir -p build
-cd ./build
+cd build
 cmake ..
-make
+make $*
 
 ./path_planning
-

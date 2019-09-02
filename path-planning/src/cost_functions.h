@@ -38,8 +38,6 @@ float lane_speed(vector<vector<Vehicle>> surroundings, int lane, double s){
     return speed;
 }
 
-
-
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
                                     /////     Rules Cost      /////
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -60,20 +58,9 @@ float subcost_Acceleration(double prev_vel, double final_vel, double T){
     return cost;
 }
 
-float subcost_Lane(Trajectory* trajectory){
-    int lane = trajectory->state->final_lane;
-    float cost = 0;
-    if (lane < 0 || lane > 2){
-        cost = MAX_COST;
-    }
-    return cost;
-}
-
 float costfunc_Rules(Trajectory* trajectory, double prev_vel, double final_vel, double T){
     float cost_1 = subcost_Speed(trajectory);
     float cost_2 = subcost_Acceleration(prev_vel, final_vel, T);
-    //float cost_3 = subcost_Lane(trajectory);
-    //cout << "Rules cost - cost1: " << cost_1 << ", cost2: " << cost_2 << endl;
     double cost = (cost_1 + cost_2)/2;
     return cost;
 }
@@ -111,9 +98,6 @@ float subcost_SpeedChange(Trajectory* trajectory, vector<vector<Vehicle>> surrou
     float current_speed = trajectory->ego->speed;
     float new_speed = lane_speed(surroundings, final_lane, trajectory->ego->s);// + trajectory->target_acc*trajectory->time_to_complete;
     float speed_change = new_speed - current_speed;
-
-   // cout << "(-- SPEED --) - new: " << new_speed << ", current: " << current_speed << ", target: " << target_speed << endl;
-
     float cost = (2.0*target_speed - current_speed - new_speed)/ (2.0*target_speed);
     return cost;
 }
@@ -122,7 +106,6 @@ float costfunc_Efficiency(Trajectory* trajectory, vector<vector<Vehicle>> surrou
     float cost_1 = subcost_LaneChange(trajectory);
     float cost_2 = subcost_SpeedChange(trajectory, surroundings);
     float cost = (cost_1 + cost_2)/ 2;
-    //cout << "[EFFICIENCY ] > cost1: " << cost_1 << ", cost2: " << cost_2 << endl;
     return cost;
 }
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -140,18 +123,12 @@ float subcost_Buffer(Trajectory* trajectory, Vehicle* next_ego, vector<vector<Ve
     float cost = numeric_limits<float>::min();
     // distance, speed, predicted position
     if (!vehicles_ahead.empty()){
-        //cout << "Ahead s: " << vehicles_ahead[0].s << ", ego s: " << ego_s << endl;
-        for (auto& v: vehicles_ahead){
-            float distance = fabs(ego_s - vehicles_ahead[0].s);
-            if (distance <= buffer){
-                if (trajectory->target_acc >=0) cost = 1;
-                else cost = 0.9;
-            }
-            else continue;
+        float distance = fabs(ego_s - vehicles_ahead[0].s);
+        if (distance <= buffer){
+            if (trajectory->target_acc >=0) cost = 1;
+            else cost = 0.9;
         }
     }
-    //if (cost != 0) cost = (cost + trajectory->target_acc*SPEED_INCREMENT)/ max_cost;
-
     return cost;
 }
 
@@ -162,7 +139,7 @@ float subcost_LatitudinalCollision(Trajectory* trajectory, Vehicle* next_ego, ve
     int start_lane = trajectory->state->current_lane;
     int intended_lane = trajectory->state->intended_lane;
     double next_ego_s = next_ego->s;
-    double buffer = BUFFER_RANGE*1.2;
+    double buffer = BUFFER_RANGE;
     float total_distance = 0;
     float cost = 0;
 
@@ -176,8 +153,6 @@ float subcost_LatitudinalCollision(Trajectory* trajectory, Vehicle* next_ego, ve
                     if (distance_s <= buffer){
                         if (trajectory->target_acc >= 0) return 0.9;
                         else return MAX_COST;
-                        //collected.push_back(v);
-                        //total_distance += distance_s;
                     }
                 }
             }
@@ -193,18 +168,12 @@ float subcost_LatitudinalCollision(Trajectory* trajectory, Vehicle* next_ego, ve
                     if (distance_s <= buffer){
                         if (trajectory->target_acc >= 0) return 0.9;
                         else return MAX_COST;
-                        //collected.push_back(v);
-                        //total_distance += distance_s;
                     }
                 }
             }
             else if (vehicles_right.empty()) return cost;
         break;
     }
-
-    //if (!collected.empty()) cost = exp(-(total_distance/(collected.size()*buffer)));
-
-    //return cost;
 }
 
 
@@ -217,7 +186,7 @@ float costfunc_Safety(Trajectory* trajectory, Vehicle* next_ego, vector<vector<V
     char mode;
 
     if (trajectory->state->id.compare(KL)==0){
-        lat_cost = 0;//subcost_LatitudinalCollision(trajectory, next_ego, surroundings, T, mode);
+        lat_cost = 0;
         buffer_cost = subcost_Buffer(trajectory, next_ego, surroundings);
         cost = buffer_cost;
     }
@@ -237,8 +206,6 @@ float costfunc_Safety(Trajectory* trajectory, Vehicle* next_ego, vector<vector<V
             cost = (buffer_cost + lat_cost)/ 2;
         }
     }
-
-    //cout << "(..SAFETY...) - lat cost: " << lat_cost << ", buffer cost: " << buffer_cost << endl;
     return cost;
 }
 

@@ -67,15 +67,15 @@ float Trajectory::cost(double prev_vel, double final_vel){
     float cost;
     double weight = RULES_COST + EFFICIENCY_COST + SAFETY_COST;
     Vehicle next_ego = this->ego->next_ego(this);
+    string RDY ("RDY");
     char mode;
     
     vector<vector<Vehicle>> surroundings = {this->ego->vehicles_ahead, this->ego->vehicles_behind, this->ego->vehicles_left, this->ego->vehicles_right};
-    if (this->state->id != "RDY"){
+    if (this->state->id.compare(RDY) != 0){
         float rules_cost = costfunc_Rules(this, prev_vel, final_vel, this->time_to_complete);
         float efficiency_cost = costfunc_Efficiency(this, surroundings);
         float safety_cost = costfunc_Safety(this, &next_ego, surroundings, this->time_to_complete);
         cost = (RULES_COST*rules_cost + EFFICIENCY_COST*efficiency_cost + SAFETY_COST*safety_cost)/ weight;
-        //cout << "*COST BRKDWN* --> Acc: " << this->target_acc << " | Rules: " << rules_cost << " | Efficiency: " << efficiency_cost << " | Safety: " << safety_cost << " | Sum: " << cost << endl;
     }
     else {
         cost = MAX_COST;

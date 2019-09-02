@@ -9,16 +9,8 @@
 using std::sort;
 using namespace std;
 
-bool Vehicle::sort_distance_to_ego(const Vehicle& left, const Vehicle& right){
-    return get_distance(this->x, this->y, left.x, left.y) < get_distance(this->x, this->y, right.x, right.y);
-}
-
-bool Vehicle::sort_increment(const Vehicle& left, const Vehicle& right){
+bool Vehicle::sorting(const Vehicle& left, const Vehicle& right){
     return abs(this->s - left.s) < abs(this->s - right.s);
-}
-
-bool Vehicle::sort_decrement(const Vehicle& left, const Vehicle& right){
-    return abs(this->s - left.s) > abs(this->s - right.s);
 }
 
 Vehicle::Vehicle(){}
@@ -85,15 +77,10 @@ vector<vector<Vehicle>> Vehicle::sort_vehicles(vector<Vehicle> surroundings){
             else if (v.lane == right_lane) vehicles_right.push_back(v);
         }
     }
-    //if (vehicles_ahead.size() > 0) sort(vehicles_ahead.begin(), vehicles_ahead.end(), [this](Vehicle left, Vehicle right){return sort_increment(left, right);});
-    //if (vehicles_behind.size() > 0) sort(vehicles_behind.begin(), vehicles_behind.end(), [this](Vehicle left, Vehicle right){return sort_decrement(left, right);});
-    //if (vehicles_behind.size() > 0) sort(vehicles_behind.begin(), vehicles_behind.end(), [this](Vehicle left, Vehicle right){return sort_decrement(left, right);});
-    //if (vehicles_behind.size() > 0) sort(vehicles_behind.begin(), vehicles_behind.end(), [this](Vehicle left, Vehicle right){return sort_decrement(left, right);});
-
     vector<vector<Vehicle>> sorted_vehicles = {vehicles_ahead, vehicles_behind, vehicles_left, vehicles_right};
 
     for (auto& vehicles: sorted_vehicles){
-        if (!vehicles.empty()) sort(vehicles.begin(), vehicles.end(), [this](Vehicle left, Vehicle right){ return sort_increment(left, right); });
+        if (!vehicles.empty()) sort(vehicles.begin(), vehicles.end(), [this](Vehicle left, Vehicle right){ return sorting(left, right); });
     }
 
     return sorted_vehicles;

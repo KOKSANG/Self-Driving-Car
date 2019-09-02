@@ -21,9 +21,9 @@
 #define TRACK_LENGTH 6945.554
 #define LANE_WIDTH 4
 #define BUFFER_RANGE 20
-#define RULES_COST 2.0
+#define RULES_COST 1.0
 #define EFFICIENCY_COST 1.0
-#define SAFETY_COST 2.0
+#define SAFETY_COST 1.0
 #define MAX_COST 1
 
 #endif

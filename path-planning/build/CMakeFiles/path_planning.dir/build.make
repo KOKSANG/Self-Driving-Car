@@ -60,15 +60,15 @@ include CMakeFiles/path_planning.dir/flags.make
 CMakeFiles/path_planning.dir/src/main.cpp.o: CMakeFiles/path_planning.dir/flags.make
 CMakeFiles/path_planning.dir/src/main.cpp.o: ../src/main.cpp
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/koksang/Projects/Self-Driving-Car/path-planning/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/path_planning.dir/src/main.cpp.o"
-	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/path_planning.dir/src/main.cpp.o -c /home/koksang/Projects/Self-Driving-Car/path-planning/src/main.cpp
+	/home/linuxbrew/.linuxbrew/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/path_planning.dir/src/main.cpp.o -c /home/koksang/Projects/Self-Driving-Car/path-planning/src/main.cpp
 
 CMakeFiles/path_planning.dir/src/main.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/path_planning.dir/src/main.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/koksang/Projects/Self-Driving-Car/path-planning/src/main.cpp > CMakeFiles/path_planning.dir/src/main.cpp.i
+	/home/linuxbrew/.linuxbrew/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/koksang/Projects/Self-Driving-Car/path-planning/src/main.cpp > CMakeFiles/path_planning.dir/src/main.cpp.i
 
 CMakeFiles/path_planning.dir/src/main.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/path_planning.dir/src/main.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/koksang/Projects/Self-Driving-Car/path-planning/src/main.cpp -o CMakeFiles/path_planning.dir/src/main.cpp.s
+	/home/linuxbrew/.linuxbrew/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/koksang/Projects/Self-Driving-Car/path-planning/src/main.cpp -o CMakeFiles/path_planning.dir/src/main.cpp.s
 
 CMakeFiles/path_planning.dir/src/main.cpp.o.requires:
 

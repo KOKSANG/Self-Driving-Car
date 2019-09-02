@@ -145,7 +145,6 @@ int main() {
             points_y.push_back(ref_y);
 
             car_s = end_path_s;
-            //state = State("KL", 1);
           }
 
           // Transform sensor fusion into vehicle object

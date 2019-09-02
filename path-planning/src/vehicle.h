@@ -53,19 +53,9 @@ class Vehicle {
 
         Vehicle next_ego(Trajectory* traj);
 
-        vector<Vehicle> ahead(vector<Vehicle> others, double T);
-
-        vector<Vehicle> behind(vector<Vehicle> others, double T);
-
-        vector<Vehicle> side(vector<Vehicle> others, double T, char mode);
-
         vector<vector<Vehicle>> sort_vehicles(vector<Vehicle> surroundings);
 
-        bool sort_distance_to_ego(const Vehicle& left, const Vehicle& right);
-
-        bool sort_increment(const Vehicle& left, const Vehicle& right);
-
-        bool sort_decrement(const Vehicle& left, const Vehicle& right);
+        bool sorting(const Vehicle& left, const Vehicle& right);
 
     private:
         double get_speed() const;

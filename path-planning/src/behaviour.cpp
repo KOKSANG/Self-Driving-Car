@@ -102,27 +102,19 @@ vector<vector<double>> Behaviour::forecast_points(State* state, vector<double> p
     double buffer_1 = 1.5*BUFFER_RANGE;
     double buffer_2 = 3.0*BUFFER_RANGE;
     double buffer_3 = 4.5*BUFFER_RANGE;
-    //double buffer_4 = 4.0*BUFFER_RANGE;
-    //double buffer_5 = 5.0*BUFFER_RANGE;
     double final_d = MIN_D+this->state->final_lane*LANE_WIDTH;
     // Add Frenet of evenly spaced 30m
     vector<double> next_wp0 = this->map->getXY(this->ego->s + buffer_1, final_d);
     vector<double> next_wp1 = this->map->getXY(this->ego->s + buffer_2, final_d);
     vector<double> next_wp2 = this->map->getXY(this->ego->s + buffer_3, final_d);
-    //vector<double> next_wp3 = this->map->getXY(this->ego->s + buffer_4, final_d);
-    //vector<double> next_wp4 = this->map->getXY(this->ego->s + buffer_5, final_d);
     // push net waypoints x
     points_x.push_back(next_wp0[0]);
     points_x.push_back(next_wp1[0]);
     points_x.push_back(next_wp2[0]);
-    //points_x.push_back(next_wp3[0]);
-    //points_x.push_back(next_wp4[0]);
     // push net waypoints y
     points_y.push_back(next_wp0[1]);
     points_y.push_back(next_wp1[1]);
     points_y.push_back(next_wp2[1]);
-    //points_y.push_back(next_wp3[1]);
-    //points_y.push_back(next_wp4[1]);
     // Shifting
     for (unsigned int i=0; i < points_x.size(); i++){
         // shift car reference angle to 0 degrees
@@ -136,7 +128,6 @@ vector<vector<double>> Behaviour::forecast_points(State* state, vector<double> p
 
 Trajectory Behaviour::get_best_trajectory(vector<double> points_x, vector<double> points_y){
     vector<State> next_states = available_states();
-    //vector<State> next_states = {State("KL", 0)};
     vector<double> next_acc = {1, 0, -1};
     vector<double> ptsx, ptsy;
     vector<vector<double>> points;
