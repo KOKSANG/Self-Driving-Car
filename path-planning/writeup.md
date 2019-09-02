@@ -12,9 +12,8 @@ The goals / steps of this project are the followings:
 
 [//]: # (Image References)
 
-[p0]: ./P0.gif "Car Behaviour when P=0"
-[d0]: ./D0.gif "Car Behaviour when D=0"
-[i0]: ./I0.gif "Car Behaviour when I=0"
+[flowchart]: ./flowchart.png "General flow of planner"
+[FSM]: ./FSM.png "FSM"
 
 ## Rubric Points
 ### Here I will consider the [rubric points](https://review.udacity.com/#!/rubrics/1971/view) individually and describe how I addressed each point in my implementation.  
@@ -41,32 +40,95 @@ All criteria have been successfully met. The demo video can be found at [DEMO](h
 
 ### 4. Reflection
 
-The general flow of the planner 
+The general flow of the planner is as shown below,
+
+![General flow of planner][flowchart]
+
+The FSM that I use:
+
+![FSM][FSM]
+
+#### Here are some clarifications to be made:
+1. The parameters:
+- Max speed is 50miles/s^1, speed increment per planning occasion made to car velocity is 0.224miles/s^1.
+- Max acceleration and jerk allowed are both set to be 10.
+- Max lane change and keep lane time are 1s, to always plan out for the next maximum 1s consistently.
+- Planner is expected to update at consistent rate of 50Hz.
+- Buffer range to the car ahead is 20m, it is also made use for lane changing check buffer range.
+- Three main category of costs, rules, efficiency and safety are set to have weight of 1 only.
+
+2. How to generate trajectory:
+- Spline library is used.
+- Waypoints of 1.5, 3 and 4.5 times of buffer range are used to generate the trajectory.
+- The last two previous waypoints are also used.
+- Three variations of accelerations, increase, zero and decrease, are made to each identical trajecory.
+
+3. Initial conditions:
+- Always have "RDY" which is READY as initial state.
+- Starts at the middle lane
+- Starts at velocity of 3miles/s^1 to prevent dead stop
+
+4. Defining cost:
+- The max cost is 1 and min cost is 0
+- Cost either has binary or continuous value
+- Some trajectory costs are set to be at 0.9 for maximum, this is to promote certain trajectory
+
+---
+
+To approach this path planner, firstly, the **ego** details are collected. The ego **previous waypoints x and y** are both retained for next trajectory x and y since we know that not all previous waypoints are **consumed**. If the car initialize, the current x, y and previous x, y calculated using car current yaw are used.
+
+Next, data of **sensor fusion** are collected. A new ego is created and all these surrounding vehicles captured by sensor fusion are **sorted** according to their position to the ego, ahead, behind, left or right. Then, a new planner for the ego is created with the current reference velocity (starts at 3 initially).
+
+The planner will get all the next available states, and compare them. Variations of positive, zero and negative increment to the speed are made for each state. So now, every state will get you three new trajectories. Planner then generates and calculate all their costs, and it returns the best one.
+
+When the planner calls for trajectory generation function, the trajectory generates all its waypoints using spline. And when cost calculation function is called, the trajectory calculates the total cost based on the cost returned by all cost functions.
 
 
+### 5. Documentation
 
-* P tends to make the car swings. Higher the P, harder the swinging is. With P = 0, the car is not able to react to high gradient change of CTE.
+#### Here are the documetations for the scripts
 
-![Car Behaviour when P=0][p0]
+##### mapping.cpp
+1. Class object: **`Mapping`**
+2. Functions:
+- `getXY`, to convert frenet to xy
+- `getFrenet`, to convert xy to frenet
+- `interpolate_points`, to interpolate between original points using spline
 
+##### behavior.cpp
+1. Class object: **`Behaviour`**
+2. Functions:
+- `available_states`, to get list of next available state
+- `forecast_points`, to forecast the waypoints needed to generate a trajectory (using spline)
+- `get_best_trajectory`, to generate all possible trajectory and return the best one
+3. Class object: **`State`**
+4. Has no function
 
-* D tends to make the car drives calmly. Higher the D, the car converges to a point faster. With D = 0, the car is not able to stay on a lateral point for too long.
+##### vehicle.cpp
+1. Class object: **`Vehicle`**
+2. Functions:
+- `sorting`, a lambda function to sort vehicles based on their distance to ego in s
+- `sort_vehicles`, to sort surrounding vehicles captured by sensor fusion
+- `predict_position`, to predict next position of surrrounding vehicles
+- `next_ego`, to predict next position of ego
 
-![Car Behaviour when D=0][d0]
+##### trajectory.cpp
+1. Class object: **`Trajectory`**
+2. Functions:
+- `generate`, to generate trajectory based on the object parameters
+- `cost`, to calculate trajectory cost
 
+##### cost_functions.h
+1. Has no class object
+2. Functions:
+- `lane_speed`, to get speed of desired lane
+- `subcost_Speed`:, cost function for speed limit violation
+- `subcost_Acceleration`, cost function for acceleration limit violation
+- `costfunc_Rules`, subcost_Speed + subcost_Acceleration
+- `subcost_LaneChange`, cost function for switching lane
+- `subcost_SpeedChange`, cost function for the next highest possible speed
+- `costfunc_Efficiency`, subcost_LaneChange + subcost_SpeedChange
+- `subcost_Buffer`, cost function for buffering with car ahead
+- `subcost_LatitudinalCollision`, cost function for lane switching car checking
+- `costfunc_Safety`, subcost_Buffer + subcost_LatitudinalCollision
 
-* I tends to make the car converges to central of road. Higher I, makes the car easily to get to central. With I = 0, the car is not able to converge to central.
-
-![Car Behaviour when I=0][i0]
-
-
-#### 4. Describe how hyperparameters were chosen
-
-* For inital hyperparameters, they are all optimized manually until the car is able to drive nicely at the start and also based on the twiddle values.
-* As for final hyperparameters, they are done using twiddle which computes a descent of previous values based on the total CTE and current CTE.
-* The twiddle function can be found in PID.cpp (line 69)
-
-
-#### 5. The car must drive at least a lap succcessfully
-
-The car has been tested and validated to drive around the track for multiple laps.
