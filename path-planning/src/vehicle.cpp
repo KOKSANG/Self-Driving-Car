@@ -69,7 +69,7 @@ vector<vector<Vehicle>> Vehicle::sort_vehicles(vector<Vehicle> surroundings){
     int right_lane = this->lane + 1;
     for (Vehicle& v: surroundings){
         if (v.lane == this->lane){
-            if (v.s >= this->s) vehicles_ahead.push_back(v);
+            if (v.s > this->s) vehicles_ahead.push_back(v);
             else vehicles_behind.push_back(v);
         }
         else {

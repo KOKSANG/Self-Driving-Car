@@ -19,18 +19,18 @@ using std::abs;
 using std::cout;
 using std::sort;
 
-float lane_speed(vector<vector<Vehicle>> surroundings, int lane, double s){
+float lane_speed(vector<vector<Vehicle>> surroundings, int lane, double ego_s){
     // To get driving speed in selected lane
     float speed = MAX_SPEED_MS;
     for (int i = 0; i < surroundings.size(); i++){
         if (!surroundings[i].empty() && surroundings[i][0].lane == lane){
             // If found vehicle in the lane
-            double max_distance_with_ego = 2*BUFFER_RANGE;
-            double distance_with_ego = fabs(surroundings[i][0].s - s);
-            if (surroundings[i][0].s > s && distance_with_ego <= max_distance_with_ego){
-                // Only get the speed of closest vehicle
-                speed = surroundings[i][0].speed;
-                return speed;
+            double max_distance_with_ego = 3.0*BUFFER_RANGE;
+            double distance_with_ego = fabs(surroundings[i][0].s - ego_s);
+            for (auto& v: surroundings[i]){
+                if (v.s > ego_s && distance_with_ego <= max_distance_with_ego){
+                    if (v.speed < speed) speed = v.speed;
+                }
             }
         }
     }
@@ -114,21 +114,34 @@ float costfunc_Efficiency(Trajectory* trajectory, vector<vector<Vehicle>> surrou
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
                                     /////     Safety Cost      /////
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
-float subcost_Buffer(Trajectory* trajectory, Vehicle* next_ego, vector<vector<Vehicle>> surroundings){
+float subcost_Buffer(Trajectory* trajectory, Vehicle* next_ego, vector<vector<Vehicle>> surroundings, double T){
     double buffer = BUFFER_RANGE;
     vector<Vehicle> vehicles_ahead = surroundings[0];
     vector<Vehicle> vehicles_behind = surroundings[1];
-    double max_cost = 1 + trajectory->target_acc*SPEED_INCREMENT;
+    string RDY("RDY"), KL("KL"), PLCL("PLCL"), PLCR("PLCR"), LCL("LCL"), LCR("LCR");
+    string state_id = trajectory->state->id;
     double ego_s = trajectory->ego->s;
-    float cost = numeric_limits<float>::min();
+    double next_ego_s = next_ego->s;
+    float cost = 0;
+    //float cost = numeric_limits<float>::min();
     // distance, speed, predicted position
     if (!vehicles_ahead.empty()){
-        float distance = fabs(ego_s - vehicles_ahead[0].s);
+        double distance = abs(vehicles_ahead[0].s - ego_s);
         if (distance <= buffer){
-            if (trajectory->target_acc >=0) cost = 1;
-            else cost = 0.9;
+            if (trajectory->state->id.compare(LCL)==0 || trajectory->state->id.compare(LCR)==0){
+                if (trajectory->target_acc >= 0) cost = 0.9;
+                else cost = MAX_COST;
+            }
+            else {
+                if (trajectory->target_acc >= 0) cost = MAX_COST;
+                else cost = 0.9;
+            }
         }
+        else if (buffer < distance && distance <= 1.5*buffer) float cost = exp(-(distance/ 1.5*buffer));
+        else cost = 0;
     }
+    else if (vehicles_ahead.empty()) cost = 0;
+
     return cost;
 }
 
@@ -138,42 +151,49 @@ float subcost_LatitudinalCollision(Trajectory* trajectory, Vehicle* next_ego, ve
     vector<Vehicle> collected;
     int start_lane = trajectory->state->current_lane;
     int intended_lane = trajectory->state->intended_lane;
+    int vehicles_count = 0;
     double next_ego_s = next_ego->s;
-    double buffer = BUFFER_RANGE;
+    double buffer = LANE_CHANGE_BUFFER;
     float total_distance = 0;
     float cost = 0;
+
+    if (vehicles_left.size() > 4) vehicles_left = {vehicles_left[0], vehicles_left[1], vehicles_left[2], vehicles_left[3]};
+    if (vehicles_right.size() > 4) vehicles_right = {vehicles_right[0], vehicles_right[1], vehicles_right[2], vehicles_right[3]};
 
     switch (mode){
         case 'L':
             if (!vehicles_left.empty()){
-                if (vehicles_left.size() > 3) vehicles_left = {vehicles_left[0], vehicles_left[1], vehicles_left[2]};//, vehicles_left[4]};
                 for (Vehicle &v: vehicles_left){
                     v = v.predict_position(T);
                     double distance_s = fabs(next_ego_s - v.s);
                     if (distance_s <= buffer){
-                        if (trajectory->target_acc >= 0) return 0.9;
-                        else return MAX_COST;
+                        if (trajectory->target_acc >= 0) cost += 0.9;
+                        else cost += MAX_COST;
+                        vehicles_count++;
                     }
                 }
+                if (vehicles_count > 0) cost /= vehicles_count;
             }
             else if (vehicles_left.empty()) return cost;
         break;
 
         case 'R':
             if (!vehicles_right.empty()){
-                if (vehicles_right.size() > 3) vehicles_right = {vehicles_right[0], vehicles_right[1], vehicles_right[2]};//, vehicles_right[3]};
                 for (Vehicle &v: vehicles_right){
                     v = v.predict_position(T);
                     double distance_s = fabs(next_ego_s - v.s);
-                    if (distance_s <= buffer){
-                        if (trajectory->target_acc >= 0) return 0.9;
-                        else return MAX_COST;
+                    if ( distance_s <= buffer){
+                        if (trajectory->target_acc >= 0) cost += 0.9;
+                        else cost += MAX_COST;
+                        vehicles_count++;
                     }
                 }
+                if (vehicles_count > 0) cost /= vehicles_count;
             }
             else if (vehicles_right.empty()) return cost;
         break;
     }
+    return cost;
 }
 
 
@@ -185,27 +205,19 @@ float costfunc_Safety(Trajectory* trajectory, Vehicle* next_ego, vector<vector<V
     string RDY("RDY"), KL("KL"), PLCL("PLCL"), PLCR("PLCR"), LCL("LCL"), LCR("LCR");
     char mode;
 
-    if (trajectory->state->id.compare(KL)==0){
+    if (trajectory->state->id.compare(KL) == 0){
         lat_cost = 0;
-        buffer_cost = subcost_Buffer(trajectory, next_ego, surroundings);
+        buffer_cost = subcost_Buffer(trajectory, next_ego, surroundings, T);
         cost = buffer_cost;
     }
     else {
         if (trajectory->state->id.back() == 'L') mode = 'L';
         else if (trajectory->state->id.back() == 'R') mode = 'R';
-
-        if (trajectory->state->id.compare(PLCL)==0 || trajectory->state->id.compare(PLCR)==0){
-            lat_cost = subcost_LatitudinalCollision(trajectory, next_ego, surroundings, T, mode);
-            buffer_cost = subcost_Buffer(trajectory, next_ego, surroundings);
-            cost = (buffer_cost + lat_cost)/ 2;
-        }
-
-        else if (trajectory->state->id.compare(LCL)==0 || trajectory->state->id.compare(LCR)==0){
-            lat_cost = subcost_LatitudinalCollision(trajectory, next_ego, surroundings, T, mode);
-            buffer_cost = subcost_Buffer(trajectory, next_ego, surroundings);
-            cost = (buffer_cost + lat_cost)/ 2;
-        }
+        lat_cost = subcost_LatitudinalCollision(trajectory, next_ego, surroundings, T, mode);
+        buffer_cost = subcost_Buffer(trajectory, next_ego, surroundings, T);
+        cost = (buffer_cost + lat_cost)/ 2;
     }
+    //cout << "SAFETY - buffer: " << buffer_cost << ", lat: " << lat_cost << endl;
     return cost;
 }
 

@@ -87,11 +87,11 @@ vector<State> Behaviour::available_states(){
     }
     else if (current_state->id.compare(LCL)==0){
         if (this->ego->lane == 0) states = {State("KL", this->ego->lane)};
-        else if (this->ego->lane != 0) states = {State("KL", this->ego->lane), State("LCL", this->ego->lane)};//, State("PLCL", this->ego->lane)};
+        else if (this->ego->lane != 0) states = {State("KL", this->ego->lane), State("LCL", this->ego->lane)};
     }
     else if (current_state->id.compare(LCR)==0){
-        if (this->ego->lane == 2) states = {State("KL", this->ego->lane)};//, State("PLCL", this->ego->lane)};
-        else if (this->ego->lane != 2) states = {State("KL", this->ego->lane), State("LCR", this->ego->lane)};//, State("PLCR", this->ego->lane)};
+        if (this->ego->lane == 2) states = {State("KL", this->ego->lane)};
+        else if (this->ego->lane != 2) states = {State("KL", this->ego->lane), State("LCR", this->ego->lane)};
     }
     
     return states;
@@ -99,11 +99,11 @@ vector<State> Behaviour::available_states(){
 
 vector<vector<double>> Behaviour::forecast_points(State* state, vector<double> points_x, vector<double> points_y){
     int lane = state->intended_lane;
-    double buffer_1 = 1.5*BUFFER_RANGE;
-    double buffer_2 = 3.0*BUFFER_RANGE;
-    double buffer_3 = 4.5*BUFFER_RANGE;
+    double buffer_1 = 2.0*BUFFER_RANGE;
+    double buffer_2 = 2.5*BUFFER_RANGE;
+    double buffer_3 = 3.0*BUFFER_RANGE;
     double final_d = MIN_D+this->state->final_lane*LANE_WIDTH;
-    // Add Frenet of evenly spaced 30m
+    // Add Frenet of evenly spaced
     vector<double> next_wp0 = this->map->getXY(this->ego->s + buffer_1, final_d);
     vector<double> next_wp1 = this->map->getXY(this->ego->s + buffer_2, final_d);
     vector<double> next_wp2 = this->map->getXY(this->ego->s + buffer_3, final_d);
@@ -137,7 +137,7 @@ Trajectory Behaviour::get_best_trajectory(vector<double> points_x, vector<double
     float cost = numeric_limits<float>::max();
 
     for (auto& state: next_states){ 
-        cout << "[   STATE   ] <<<<< id: " << state.id << " | current lane: " << state.current_lane << " | intended: " << state.intended_lane << " | final: " << state.final_lane << " >>>>>" << endl;
+        cout << "[ STATE ] >> ID: " << state.id << " | Current lane: " << state.current_lane << " | Intended lane: " << state.intended_lane << " | Final lane: " << state.final_lane << endl;
         points = forecast_points(&state, points_x, points_y);
         ptsx = points[0];
         ptsy = points[1];

@@ -27,7 +27,7 @@ using namespace Eigen;
 
 /* CONSTANTS defined over here */
 // max speed limit in miles per sec
-double ref_vel = 3;
+double ref_vel = 0;
 int lane = 1;
 
 Trajectory best_trajectory;
@@ -161,17 +161,18 @@ int main() {
             surrounding_vehicles.push_back(Vehicle(id, x, y, vx, vy, s, d, &map));
           }
 
+          // Create new and updated ego object
           Vehicle ego = Vehicle(000, ref_x, ref_y, car_s, car_d, ref_yaw, car_speed, previous_path_x, previous_path_y, surrounding_vehicles, &state, &map);
-          cout << endl;
-          cout << "============================================================= | Current state: " << state.id << ", Ego s: " << ego.s << endl;
+          cout << "--" << endl <<"==================== | Current state: " << state.id << ", Ego s: " << ego.s << ", Velocity: " << ref_vel << " | ====================" << endl;
 
           Behaviour planner = Behaviour(&ego, ref_vel);
           Trajectory traj = planner.get_best_trajectory(points_x, points_y);
-
-          cout << "[ BEST TRAJ ] - ref_vel: " << traj.ref_vel << ", time to complete: " << traj.time_to_complete << ", id: " << traj.state->id << ", final lane: " << traj.state->final_lane << ", Acc: " << traj.target_acc << endl;
           
           ref_vel = traj.ref_vel;
           state = *traj.state;
+
+          cout << "[ BEST  ] - ID: " << traj.state->id  << ", Current lane: " << traj.state->current_lane << ", Final lane: " << traj.state->final_lane;
+          cout << ", Velocity: " << ref_vel << ", Acc: " << traj.target_acc << ", Time generated: " << traj.time_to_complete << endl;
 
           next_x_vals = traj.points_x;
           next_y_vals = traj.points_y;

@@ -39,10 +39,11 @@ void Trajectory::generate(Mapping* map){
     double ref_yaw = this->ego->yaw;
     this->points_x = this->ego->prev_x;
     this->points_y = this->ego->prev_y;
-    this->ref_vel += this->target_acc*SPEED_INCREMENT;
+    //this->ref_vel += this->target_acc*SPEED_INCREMENT;
 
     double x_add_on = 0;
     for (int i=0; i <= this->step_to_complete; i++){
+        this->ref_vel += this->target_acc*SPEED_INCREMENT;
         double N = this->target_distance/ (0.02*this->ref_vel*0.44704);
         double x_point = x_add_on + this->target_x/ N;
         double y_point = this->spline(x_point);
@@ -76,6 +77,7 @@ float Trajectory::cost(double prev_vel, double final_vel){
         float efficiency_cost = costfunc_Efficiency(this, surroundings);
         float safety_cost = costfunc_Safety(this, &next_ego, surroundings, this->time_to_complete);
         cost = (RULES_COST*rules_cost + EFFICIENCY_COST*efficiency_cost + SAFETY_COST*safety_cost)/ weight;
+        //cout << "[COST BRKDWN] - " << "Rules: " << rules_cost << ", Efficiency: " << efficiency_cost << ", Safety: " << safety_cost << ", Sum: " << cost << endl;
     }
     else {
         cost = MAX_COST;
