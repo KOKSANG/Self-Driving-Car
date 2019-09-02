@@ -1,3 +1,0 @@
-/home/koksang/Projects/Self-Driving-Car/path-planning/build/CMakeFiles/rebuild_cache.dir
-/home/koksang/Projects/Self-Driving-Car/path-planning/build/CMakeFiles/path_planning.dir
-/home/koksang/Projects/Self-Driving-Car/path-planning/build/CMakeFiles/edit_cache.dir
