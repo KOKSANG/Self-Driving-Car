@@ -25,7 +25,7 @@ float lane_speed(vector<vector<Vehicle>> surroundings, int lane, double ego_s){
     for (int i = 0; i < surroundings.size(); i++){
         if (!surroundings[i].empty() && surroundings[i][0].lane == lane){
             // If found vehicle in the lane
-            double buffer_1 = LANE_CHANGE_BUFFER;
+            double buffer_1 = 3.0*BUFFER_RANGE;
             double buffer_2 = BUFFER_RANGE;
             double distance_with_ego = fabs(surroundings[i][0].s - ego_s);
             for (auto& v: surroundings[i]){
