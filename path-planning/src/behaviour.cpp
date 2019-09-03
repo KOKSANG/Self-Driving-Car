@@ -99,9 +99,9 @@ vector<State> Behaviour::available_states(){
 
 vector<vector<double>> Behaviour::forecast_points(State* state, vector<double> points_x, vector<double> points_y){
     int lane = state->intended_lane;
-    double buffer_1 = 2.0*BUFFER_RANGE;
-    double buffer_2 = 2.5*BUFFER_RANGE;
-    double buffer_3 = 3.0*BUFFER_RANGE;
+    double buffer_1 = 30;
+    double buffer_2 = 40;
+    double buffer_3 = 50;
     double final_d = MIN_D+this->state->final_lane*LANE_WIDTH;
     // Add Frenet of evenly spaced
     vector<double> next_wp0 = this->map->getXY(this->ego->s + buffer_1, final_d);

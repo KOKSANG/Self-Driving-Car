@@ -29,7 +29,7 @@ My project has a run.sh script. Just run it to compile and run the code. It shou
 
 #### Here are a few criteria to be evaluated:
 * The car is able to drive at least **4.32 miles** without incident
-* The car drives according to the speed limit, `(50 miles/s)`.
+* The car drives according to the speed limit, `(50 miles/h)`.
 * Max **Acceleration** `(10 m/s^2)` and **Jerk** `(10 m/s^3)` are not Exceeded.
 * Car does not have collisions.
 * The car stays in its lane, except for the time between changing lanes and lane changing does not take >3 seconds.
@@ -50,16 +50,16 @@ The FSM that I use:
 
 #### Here are some clarifications to be made:
 1. The parameters:
-- Max speed is 50miles/s^1, speed increment per planning occasion made to car velocity is 0.224miles/s^1.
+- Max speed is 49.75miles/h, speed increment per step made to car velocity is 0.25miles/s^1.
 - Max acceleration and jerk allowed are both set to be 10.
 - Max lane change and keep lane time are 1s, to always plan out for the next maximum 1s consistently.
 - Planner is expected to update at consistent rate of 50Hz.
 - Buffer range to the car ahead is 20m, it is also made use for lane changing check buffer range.
-- Three main category of costs, rules, efficiency and safety are set to have weight of 1 only.
+- Three main category of costs, rules, efficiency and safety are set to have weight of 2, 0.5 and 2 respectively.
 
 2. How to generate trajectory:
 - Spline library is used.
-- Waypoints of 1.5, 3 and 4.5 times of buffer range are used to generate the trajectory.
+- Waypoints of 30, 40 and 50 meters are used to generate the trajectory.
 - The last two previous waypoints are also used.
 - Three variations of accelerations, increase, zero and decrease, are made to each identical trajecory.
 
@@ -131,4 +131,16 @@ When the planner calls for trajectory generation function, the trajectory genera
 - `subcost_Buffer`, cost function for buffering with car ahead
 - `subcost_LatitudinalCollision`, cost function for lane switching car checking
 - `costfunc_Safety`, subcost_Buffer + subcost_LatitudinalCollision
+
+### 5. Improvements/ Limitations
+
+#### Limitations
+1. I have realized that my planner is not able to detect any car ahead with distance in s less than 10m with my ego.
+2. The planner is not able to react to sudden cutting of other cars (which might be due to the 10m limitation).
+3. The planner is only able to plan for not more than one next lane, which sometimes the next two lane is a better path.
+4. The planner do make some weird decision sometimes, cost functions need further tuning.
+
+### Improvements
+1. Do consider more future affecting factors, for example, comparing the path after making the lane change to the next lane or lane change to the next two lanes.
+2. Try with machine learning approach, eg: decision tree or bayes, since cost functions alone is not the best way of doing it.
 
