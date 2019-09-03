@@ -49,7 +49,7 @@ The FSM that I use:
 ![FSM][FSM]
 
 #### Here are some clarifications to be made:
-1. The parameters:
+* The parameters:
 - Max speed is 49.75miles/h, speed increment per step made to car velocity is 0.25miles/s^1.
 - Max acceleration and jerk allowed are both set to be 10.
 - Max lane change and keep lane time are 1s, to always plan out for the next maximum 1s consistently.
@@ -57,18 +57,17 @@ The FSM that I use:
 - Buffer range to the car ahead is 20m, it is also made use for lane changing check buffer range.
 - Three main category of costs, rules, efficiency and safety are set to have weight of 2, 0.5 and 2 respectively.
 
-2. How to generate trajectory:
+* How to generate trajectory:
 - Spline library is used.
 - Waypoints of 30, 40 and 50 meters are used to generate the trajectory.
 - The last two previous waypoints are also used.
 - Three variations of accelerations, increase, zero and decrease, are made to each identical trajecory.
 
-3. Initial conditions:
+* Initial conditions:
 - Always have "RDY" which is READY as initial state.
 - Starts at the middle lane
-- Starts at velocity of 3miles/s^1 to prevent dead stop
 
-4. Defining cost:
+* Defining cost:
 - The max cost is 1 and min cost is 0
 - Cost either has binary or continuous value
 - Some trajectory costs are set to be at 0.9 for maximum, this is to promote certain trajectory
@@ -89,15 +88,15 @@ When the planner calls for trajectory generation function, the trajectory genera
 #### Here are the documetations for the scripts
 
 ##### mapping.cpp
-1. Class object: **`Mapping`**
-2. Functions:
+* Class object: **`Mapping`**
+* Functions:
 - `getXY`, to convert frenet to xy
 - `getFrenet`, to convert xy to frenet
 - `interpolate_points`, to interpolate between original points using spline
 
 ##### behavior.cpp
-1. Class object: **`Behaviour`**
-2. Functions:
+* Class object: **`Behaviour`**
+* Functions:
 - `available_states`, to get list of next available state
 - `forecast_points`, to forecast the waypoints needed to generate a trajectory (using spline)
 - `get_best_trajectory`, to generate all possible trajectory and return the best one
@@ -105,22 +104,22 @@ When the planner calls for trajectory generation function, the trajectory genera
 4. Has no function
 
 ##### vehicle.cpp
-1. Class object: **`Vehicle`**
-2. Functions:
+* Class object: **`Vehicle`**
+* Functions:
 - `sorting`, a lambda function to sort vehicles based on their distance to ego in s
 - `sort_vehicles`, to sort surrounding vehicles captured by sensor fusion
 - `predict_position`, to predict next position of surrrounding vehicles
 - `next_ego`, to predict next position of ego
 
 ##### trajectory.cpp
-1. Class object: **`Trajectory`**
-2. Functions:
+* Class object: **`Trajectory`**
+* Functions:
 - `generate`, to generate trajectory based on the object parameters
 - `cost`, to calculate trajectory cost
 
 ##### cost_functions.h
-1. Has no class object
-2. Functions:
+* Has no class object
+* Functions:
 - `lane_speed`, to get speed of desired lane
 - `subcost_Speed`:, cost function for speed limit violation
 - `subcost_Acceleration`, cost function for acceleration limit violation
@@ -135,12 +134,12 @@ When the planner calls for trajectory generation function, the trajectory genera
 ### 5. Improvements/ Limitations
 
 #### Limitations
-1. I have realized that my planner is not able to detect any car ahead with distance in s less than 10m with my ego.
-2. The planner is not able to react to sudden cutting of other cars (which might be due to the 10m limitation).
-3. The planner is only able to plan for not more than one next lane, which sometimes the next two lane is a better path.
-4. The planner do make some weird decision sometimes, cost functions need further tuning.
+* I have realized that my planner is not able to detect any car ahead with distance in s less than 10m with my ego.
+* The planner is not able to react to sudden cutting of other cars (which might be due to the 10m limitation).
+* The planner is only able to plan for not more than one next lane, which sometimes the next two lane is a better path.
+* The planner do make some weird decision sometimes, cost functions need further tuning.
 
 ### Improvements
-1. Do consider more future affecting factors, for example, comparing the path after making the lane change to the next lane or lane change to the next two lanes.
-2. Try with machine learning approach, eg: decision tree or bayes, since cost functions alone is not the best way of doing it.
+* Do consider more future affecting factors, for example, comparing the path after making the lane change to the next lane or lane change to the next two lanes.
+* Try with machine learning approach, eg: decision tree or bayes, since cost functions alone is not the best way of doing it.
 
