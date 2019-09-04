@@ -8,4 +8,5 @@ This is a collection of projects that I have done in Self-Driving Car Nanodegree
 4. Transfer learning for behavioral cloning using Nvidia model
 5. Extended Kalman Filter
 6. Kidnapped Vehicle Project
-7. PID Controller
+7. Path Planning
+8. PID Controller
