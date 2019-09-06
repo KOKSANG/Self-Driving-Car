@@ -1,145 +1,145 @@
-# CarND-Path-Planning-Project
-Self-Driving Car Engineer Nanodegree Program
-   
-### Simulator.
-You can download the Term3 Simulator which contains the Path Planning Project from the [releases tab (https://github.com/udacity/self-driving-car-sim/releases/tag/T3_v1.2).  
+# **Path Planning** 
+---
 
-To run the simulator on Mac/Linux, first make the binary file executable with the following command:
-```shell
-sudo chmod u+x {simulator_file_name}
-```
+**Path Planning Project**
 
-### Goals
-In this project your goal is to safely navigate around a virtual highway with other traffic that is driving +-10 MPH of the 50 MPH speed limit. You will be provided the car's localization and sensor fusion data, there is also a sparse map list of waypoints around the highway. The car should try to go as close as possible to the 50 MPH speed limit, which means passing slower traffic when possible, note that other cars will try to change lanes too. The car should avoid hitting other cars at all cost as well as driving inside of the marked road lanes at all times, unless going from one lane to another. The car should be able to make one complete loop around the 6946m highway. Since the car is trying to go 50 MPH, it should take a little over 5 minutes to complete 1 loop. Also the car should not experience total acceleration over 10 m/s^2 and jerk that is greater than 10 m/s^3.
+The goals / steps of this project are the followings:
+* Build a path planner to enable the car drive around the track
+* Finetune the parameters that enables the car to drive
+* The car has to drive according to a few rules
+* Make sure the car can at least drive one lap
+* Document and summarize the results
 
-#### The map of the highway is in data/highway_map.txt
-Each waypoint in the list contains  [x,y,s,dx,dy] values. x and y are the waypoint's map coordinate position, the s value is the distance along the road to get to that waypoint in meters, the dx and dy values define the unit normal vector pointing outward of the highway loop.
+[//]: # (Image References)
 
-The highway's waypoints loop around so the frenet s value, distance along the road, goes from 0 to 6945.554.
+[flowchart]: ./flowchart.png "General flow of planner"
+[FSM]: ./FSM.png "FSM"
 
-## Basic Build Instructions
-
-1. Clone this repo.
-2. Make a build directory: `mkdir build && cd build`
-3. Compile: `cmake .. && make`
-4. Run it: `./path_planning`.
-
-Here is the data provided from the Simulator to the C++ Program
-
-#### Main car's localization Data (No Noise)
-
-["x"] The car's x position in map coordinates
-
-["y"] The car's y position in map coordinates
-
-["s"] The car's s position in frenet coordinates
-
-["d"] The car's d position in frenet coordinates
-
-["yaw"] The car's yaw angle in the map
-
-["speed"] The car's speed in MPH
-
-#### Previous path data given to the Planner
-
-//Note: Return the previous list but with processed points removed, can be a nice tool to show how far along
-the path has processed since last time. 
-
-["previous_path_x"] The previous list of x points previously given to the simulator
-
-["previous_path_y"] The previous list of y points previously given to the simulator
-
-#### Previous path's end s and d values 
-
-["end_path_s"] The previous list's last point's frenet s value
-
-["end_path_d"] The previous list's last point's frenet d value
-
-#### Sensor Fusion Data, a list of all other car's attributes on the same side of the road. (No Noise)
-
-["sensor_fusion"] A 2d vector of cars and then that car's [car's unique ID, car's x position in map coordinates, car's y position in map coordinates, car's x velocity in m/s, car's y velocity in m/s, car's s position in frenet coordinates, car's d position in frenet coordinates. 
-
-## Details
-
-1. The car uses a perfect controller and will visit every (x,y) point it recieves in the list every .02 seconds. The units for the (x,y) points are in meters and the spacing of the points determines the speed of the car. The vector going from a point to the next point in the list dictates the angle of the car. Acceleration both in the tangential and normal directions is measured along with the jerk, the rate of change of total Acceleration. The (x,y) point paths that the planner recieves should not have a total acceleration that goes over 10 m/s^2, also the jerk should not go over 50 m/s^3. (NOTE: As this is BETA, these requirements might change. Also currently jerk is over a .02 second interval, it would probably be better to average total acceleration over 1 second and measure jerk from that.
-
-2. There will be some latency between the simulator running and the path planner returning a path, with optimized code usually its not very long maybe just 1-3 time steps. During this delay the simulator will continue using points that it was last given, because of this its a good idea to store the last points you have used so you can have a smooth transition. previous_path_x, and previous_path_y can be helpful for this transition since they show the last points given to the simulator controller with the processed points already removed. You would either return a path that extends this previous path or make sure to create a new path that has a smooth transition with this last path.
-
-## Tips
-
-A really helpful resource for doing this project and creating smooth trajectories was using http://kluge.in-chemnitz.de/opensource/spline/, the spline function is in a single hearder file is really easy to use.
+## Rubric Points
+### Here I will consider the [rubric points](https://review.udacity.com/#!/rubrics/1971/view) individually and describe how I addressed each point in my implementation.  
 
 ---
 
-## Dependencies
+### 1. Code should compile
 
-* cmake >= 3.5
-  * All OSes: [click here for installation instructions](https://cmake.org/install/)
-* make >= 4.1
-  * Linux: make is installed by default on most Linux distros
-  * Mac: [install Xcode command line tools to get make](https://developer.apple.com/xcode/features/)
-  * Windows: [Click here for installation instructions](http://gnuwin32.sourceforge.net/packages/make.htm)
-* gcc/g++ >= 5.4
-  * Linux: gcc / g++ is installed by default on most Linux distros
-  * Mac: same deal as make - [install Xcode command line tools]((https://developer.apple.com/xcode/features/)
-  * Windows: recommend using [MinGW](http://www.mingw.org/)
-* [uWebSockets](https://github.com/uWebSockets/uWebSockets)
-  * Run either `install-mac.sh` or `install-ubuntu.sh`.
-  * If you install from source, checkout to commit `e94b6e1`, i.e.
-    ```
-    git clone https://github.com/uWebSockets/uWebSockets 
-    cd uWebSockets
-    git checkout e94b6e1
-    ```
-
-## Editor Settings
-
-We've purposefully kept editor configuration files out of this repo in order to
-keep it as simple and environment agnostic as possible. However, we recommend
-using the following settings:
-
-* indent using spaces
-* set tab width to 2 spaces (keeps the matrices in source code aligned)
-
-## Code Style
-
-Please (do your best to) stick to [Google's C++ style guide](https://google.github.io/styleguide/cppguide.html).
-
-## Project Instructions and Rubric
-
-Note: regardless of the changes you make, your project must be buildable using
-cmake and make!
+My project has a run.sh script. Just run it to compile and run the code. It should run with no problem.
 
 
-## Call for IDE Profiles Pull Requests
+### 2. Valid trajectories
 
-Help your fellow students!
+#### Here are a few criteria to be evaluated:
+* The car is able to drive at least **4.32 miles** without incident
+* The car drives according to the speed limit, `(50 miles/h)`.
+* Max **Acceleration** `(10 m/s^2)` and **Jerk** `(10 m/s^3)` are not Exceeded.
+* Car does not have collisions.
+* The car stays in its lane, except for the time between changing lanes and lane changing does not take >3 seconds.
+* The car is able to change lanes
 
-We decided to create Makefiles with cmake to keep this project as platform
-agnostic as possible. Similarly, we omitted IDE profiles in order to ensure
-that students don't feel pressured to use one IDE or another.
+All criteria have been successfully met. The demo video can be found at [DEMO](https://youtu.be/eMWW5sSe0bg)
 
-However! I'd love to help people get up and running with their IDEs of choice.
-If you've created a profile for an IDE that you think other students would
-appreciate, we'd love to have you add the requisite profile files and
-instructions to ide_profiles/. For example if you wanted to add a VS Code
-profile, you'd add:
 
-* /ide_profiles/vscode/.vscode
-* /ide_profiles/vscode/README.md
+### 3. Reflection
 
-The README should explain what the profile does, how to take advantage of it,
-and how to install it.
+The general flow of the planner is as shown below,
 
-Frankly, I've never been involved in a project with multiple IDE profiles
-before. I believe the best way to handle this would be to keep them out of the
-repo root to avoid clutter. My expectation is that most profiles will include
-instructions to copy files to a new location to get picked up by the IDE, but
-that's just a guess.
+![General flow of planner][flowchart]
 
-One last note here: regardless of the IDE used, every submitted project must
-still be compilable with cmake and make./
+The FSM that I use:
 
-## How to write a README
-A well written README file can enhance your project and portfolio.  Develop your abilities to create professional README files by completing [this free course](https://www.udacity.com/course/writing-readmes--ud777).
+![FSM][FSM]
+
+#### Here are some clarifications to be made:
+* The parameters:
+- Max speed is 49.75miles/h, speed increment per step made to car velocity is 0.25miles/s^1.
+- Max acceleration and jerk allowed are both set to be 10.
+- Max lane change and keep lane time are 1s, to always plan out for the next maximum 1s consistently.
+- Planner is expected to update at consistent rate of 50Hz.
+- Buffer range to the car ahead is 20m, it is also made use for lane changing check buffer range.
+- Three main category of costs, rules, efficiency and safety are set to have weight of 2, 0.5 and 2 respectively.
+
+* How to generate trajectory:
+- Spline library is used.
+- Waypoints of 30, 40 and 50 meters are used to generate the trajectory.
+- The last two previous waypoints are also used.
+- Three variations of accelerations, increase, zero and decrease, are made to each identical trajecory.
+
+* Initial conditions:
+- Always have "RDY" which is READY as initial state.
+- Starts at the middle lane
+
+* Defining cost:
+- The max cost is 1 and min cost is 0
+- Cost either has binary or continuous value
+- Some trajectory costs are set to be at 0.9 for maximum, this is to promote certain trajectory
+
+---
+
+To approach this path planner, firstly, the **ego** details are collected. The ego **previous waypoints x and y** are both retained for next trajectory x and y since we know that not all previous waypoints are **consumed**. If the car initialize, the current x, y and previous x, y calculated using car current yaw are used.
+
+Next, data of **sensor fusion** are collected. A new ego is created and all these surrounding vehicles captured by sensor fusion are **sorted** according to their position to the ego, ahead, behind, left or right. Then, a new planner for the ego is created with the current reference velocity (starts at 3 initially).
+
+The planner will get all the next available states, and compare them. Variations of positive, zero and negative increment to the speed are made for each state. So now, every state will get you three new trajectories. Planner then generates and calculate all their costs, and it returns the best one.
+
+When the planner calls for trajectory generation function, the trajectory generates all its waypoints using spline. And when cost calculation function is called, the trajectory calculates the total cost based on the cost returned by all cost functions.
+
+
+### 4. Documentation
+
+#### Here are the documetations for the scripts
+
+##### mapping.cpp
+* Class object: **`Mapping`**
+* Functions:
+- `getXY`, to convert frenet to xy
+- `getFrenet`, to convert xy to frenet
+- `interpolate_points`, to interpolate between original points using spline
+
+##### behavior.cpp
+* Class object: **`Behaviour`**
+* Functions:
+- `available_states`, to get list of next available state
+- `forecast_points`, to forecast the waypoints needed to generate a trajectory (using spline)
+- `get_best_trajectory`, to generate all possible trajectory and return the best one
+3. Class object: **`State`**
+4. Has no function
+
+##### vehicle.cpp
+* Class object: **`Vehicle`**
+* Functions:
+- `sorting`, a lambda function to sort vehicles based on their distance to ego in s
+- `sort_vehicles`, to sort surrounding vehicles captured by sensor fusion
+- `predict_position`, to predict next position of surrrounding vehicles
+- `next_ego`, to predict next position of ego
+
+##### trajectory.cpp
+* Class object: **`Trajectory`**
+* Functions:
+- `generate`, to generate trajectory based on the object parameters
+- `cost`, to calculate trajectory cost
+
+##### cost_functions.h
+* Has no class object
+* Functions:
+- `lane_speed`, to get speed of desired lane
+- `subcost_Speed`:, cost function for speed limit violation
+- `subcost_Acceleration`, cost function for acceleration limit violation
+- `costfunc_Rules`, subcost_Speed + subcost_Acceleration
+- `subcost_LaneChange`, cost function for switching lane
+- `subcost_SpeedChange`, cost function for the next highest possible speed
+- `costfunc_Efficiency`, subcost_LaneChange + subcost_SpeedChange
+- `subcost_Buffer`, cost function for buffering with car ahead
+- `subcost_LatitudinalCollision`, cost function for lane switching car checking
+- `costfunc_Safety`, subcost_Buffer + subcost_LatitudinalCollision
+
+### 5. Improvements/ Limitations
+
+#### Limitations
+* I have realized that my planner is not able to detect any car ahead with distance in s less than 10m with my ego.
+* The planner is not able to react to sudden cutting of other cars (which might be due to the 10m limitation).
+* The planner is only able to plan for not more than one next lane, which sometimes the next two lane is a better path.
+* The planner do make some weird decision sometimes, cost functions need further tuning.
+
+### Improvements
+* Do consider more future affecting factors, for example, comparing the path after making the lane change to the next lane or lane change to the next two lanes.
+* Try with machine learning approach, eg: decision tree or bayes, since cost functions alone is not the best way of doing it.
 
