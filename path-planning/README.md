@@ -89,48 +89,48 @@ When the planner calls for trajectory generation function, the trajectory genera
 #### Here are the documetations for the scripts
 
 ##### mapping.cpp
-1. Class object: **`Mapping`**
-2. Functions:
-  - `getXY`, to convert frenet to xy
-  - `getFrenet`, to convert xy to frenet
-  - `interpolate_points`, to interpolate between original points using spline
+i. Class object: **`Mapping`**
+ii. Functions:
+- `getXY`, to convert frenet to xy
+- `getFrenet`, to convert xy to frenet
+- `interpolate_points`, to interpolate between original points using spline
 
 ##### behavior.cpp
-1. Class object: **`Behaviour`**
-2. Functions:
-  - `available_states`, to get list of next available state
-  - `forecast_points`, to forecast the waypoints needed to generate a trajectory (using spline)
-  - `get_best_trajectory`, to generate all possible trajectory and return the best one
-3. Class object: **`State`**
-4. Has no function
+i. Class object: **`Behaviour`**
+ii. Functions:
+- `available_states`, to get list of next available state
+- `forecast_points`, to forecast the waypoints needed to generate a trajectory (using spline)
+- `get_best_trajectory`, to generate all possible trajectory and return the best one
+iii. Class object: **`State`**
+iv. Has no function
 
 ##### vehicle.cpp
-1. Class object: **`Vehicle`**
-2. Functions:
-  - `sorting`, a lambda function to sort vehicles based on their distance to ego in s
-  - `sort_vehicles`, to sort surrounding vehicles captured by sensor fusion
-  - `predict_position`, to predict next position of surrrounding vehicles
-  - `next_ego`, to predict next position of ego
+i. Class object: **`Vehicle`**
+ii. Functions:
+- `sorting`, a lambda function to sort vehicles based on their distance to ego in s
+- `sort_vehicles`, to sort surrounding vehicles captured by sensor fusion
+- `predict_position`, to predict next position of surrrounding vehicles
+- `next_ego`, to predict next position of ego
 
 ##### trajectory.cpp
-1. Class object: **`Trajectory`**
-2. Functions:
-  - `generate`, to generate trajectory based on the object parameters
-  - `cost`, to calculate trajectory cost
+i. Class object: **`Trajectory`**
+ii. Functions:
+- `generate`, to generate trajectory based on the object parameters
+- `cost`, to calculate trajectory cost
 
 ##### cost_functions.h
-1. Has no class object
-2. Functions:
-  - `lane_speed`, to get speed of desired lane
-  - `subcost_Speed`:, cost function for speed limit violation
-  - `subcost_Acceleration`, cost function for acceleration limit violation
-  - `costfunc_Rules`, subcost_Speed + subcost_Acceleration
-  - `subcost_LaneChange`, cost function for switching lane
-  - `subcost_SpeedChange`, cost function for the next highest possible speed
-  - `costfunc_Efficiency`, subcost_LaneChange + subcost_SpeedChange
-  - `subcost_Buffer`, cost function for buffering with car ahead
-  - `subcost_LatitudinalCollision`, cost function for lane switching car checking
-  - `costfunc_Safety`, subcost_Buffer + subcost_LatitudinalCollision
+i. Has no class object
+ii. Functions:
+- `lane_speed`, to get speed of desired lane
+- `subcost_Speed`:, cost function for speed limit violation
+- `subcost_Acceleration`, cost function for acceleration limit violation
+- `costfunc_Rules`, subcost_Speed + subcost_Acceleration
+- `subcost_LaneChange`, cost function for switching lane
+- `subcost_SpeedChange`, cost function for the next highest possible speed
+- `costfunc_Efficiency`, subcost_LaneChange + subcost_SpeedChange
+- `subcost_Buffer`, cost function for buffering with car ahead
+- `subcost_LatitudinalCollision`, cost function for lane switching car checking
+- `costfunc_Safety`, subcost_Buffer + subcost_LatitudinalCollision
 
 ### 5. Improvements/ Limitations
 
