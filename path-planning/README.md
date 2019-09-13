@@ -98,8 +98,8 @@ When the planner calls for trajectory generation function, the trajectory genera
 ##### behavior.cpp
 * Class object: **`Behaviour`**
 * Functions:
-*- `available_states`, to get list of next available state
-*- `forecast_points`, to forecast the waypoints needed to generate a trajectory (using spline)
+- `available_states`, to get list of next available state
+- `forecast_points`, to forecast the waypoints needed to generate a trajectory (using spline)
 - `get_best_trajectory`, to generate all possible trajectory and return the best one
 * Class object: **`State`**
 * Has no function
