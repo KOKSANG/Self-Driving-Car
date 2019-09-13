@@ -50,7 +50,7 @@ The FSM that I use:
 ![FSM][FSM]
 
 #### Here are some clarifications to be made:
-* The parameters:
+i. The parameters:
 - Max speed is 49.75miles/h, speed increment per step made to car velocity is 0.25miles/s^1.
 - Max acceleration and jerk allowed are both set to be 10.
 - Max lane change and keep lane time are 1s, to always plan out for the next maximum 1s consistently.
@@ -58,17 +58,17 @@ The FSM that I use:
 - Buffer range to the car ahead is 20m, it is also made use for lane changing check buffer range.
 - Three main category of costs, rules, efficiency and safety are set to have weight of 2, 0.5 and 2 respectively.
 
-* How to generate trajectory:
+ii. How to generate trajectory:
 - Spline library is used.
 - Waypoints of 30, 40 and 50 meters are used to generate the trajectory.
 - The last two previous waypoints are also used.
 - Three variations of accelerations, increase, zero and decrease, are made to each identical trajecory.
 
-* Initial conditions:
+iii. Initial conditions:
 - Always have "RDY" which is READY as initial state.
 - Starts at the middle lane
 
-* Defining cost:
+iv. Defining cost:
 - The max cost is 1 and min cost is 0
 - Cost either has binary or continuous value
 - Some trajectory costs are set to be at 0.9 for maximum, this is to promote certain trajectory
