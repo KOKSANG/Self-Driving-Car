@@ -89,38 +89,38 @@ When the planner calls for trajectory generation function, the trajectory genera
 #### Here are the documetations for the scripts
 
 ##### mapping.cpp
-i. Class object: **`Mapping`**
-ii. Functions:
+##### i. Class object: **`Mapping`**
+##### ii. Functions:
 - `getXY`, to convert frenet to xy
 - `getFrenet`, to convert xy to frenet
 - `interpolate_points`, to interpolate between original points using spline
 
 ##### behavior.cpp
-i. Class object: **`Behaviour`**
-ii. Functions:
+##### i. Class object: **`Behaviour`**
+##### ii. Functions:
 - `available_states`, to get list of next available state
 - `forecast_points`, to forecast the waypoints needed to generate a trajectory (using spline)
 - `get_best_trajectory`, to generate all possible trajectory and return the best one
-iii. Class object: **`State`**
-iv. Has no function
+##### iii. Class object: **`State`**
+##### iv. Has no function
 
 ##### vehicle.cpp
-i. Class object: **`Vehicle`**
-ii. Functions:
+##### i. Class object: **`Vehicle`**
+##### ii. Functions:
 - `sorting`, a lambda function to sort vehicles based on their distance to ego in s
 - `sort_vehicles`, to sort surrounding vehicles captured by sensor fusion
 - `predict_position`, to predict next position of surrrounding vehicles
 - `next_ego`, to predict next position of ego
 
 ##### trajectory.cpp
-i. Class object: **`Trajectory`**
-ii. Functions:
+##### i.Class object: **`Trajectory`**
+##### ii.Functions:
 - `generate`, to generate trajectory based on the object parameters
 - `cost`, to calculate trajectory cost
 
 ##### cost_functions.h
-i. Has no class object
-ii. Functions:
+##### i. Has no class object
+##### ii. Functions:
 - `lane_speed`, to get speed of desired lane
 - `subcost_Speed`:, cost function for speed limit violation
 - `subcost_Acceleration`, cost function for acceleration limit violation
