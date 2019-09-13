@@ -89,15 +89,15 @@ When the planner calls for trajectory generation function, the trajectory genera
 #### Here are the documetations for the scripts
 
 ##### mapping.cpp
-* Class object: **`Mapping`**
-* Functions:
+1. Class object: **`Mapping`**
+2. Functions:
 - `getXY`, to convert frenet to xy
 - `getFrenet`, to convert xy to frenet
 - `interpolate_points`, to interpolate between original points using spline
 
 ##### behavior.cpp
-* Class object: **`Behaviour`**
-* Functions:
+1. Class object: **`Behaviour`**
+2. Functions:
 - `available_states`, to get list of next available state
 - `forecast_points`, to forecast the waypoints needed to generate a trajectory (using spline)
 - `get_best_trajectory`, to generate all possible trajectory and return the best one
@@ -105,22 +105,22 @@ When the planner calls for trajectory generation function, the trajectory genera
 4. Has no function
 
 ##### vehicle.cpp
-* Class object: **`Vehicle`**
-* Functions:
+1. Class object: **`Vehicle`**
+2. Functions:
 - `sorting`, a lambda function to sort vehicles based on their distance to ego in s
 - `sort_vehicles`, to sort surrounding vehicles captured by sensor fusion
 - `predict_position`, to predict next position of surrrounding vehicles
 - `next_ego`, to predict next position of ego
 
 ##### trajectory.cpp
-* Class object: **`Trajectory`**
-* Functions:
+1. Class object: **`Trajectory`**
+2. Functions:
 - `generate`, to generate trajectory based on the object parameters
 - `cost`, to calculate trajectory cost
 
 ##### cost_functions.h
-* Has no class object
-* Functions:
+1. Has no class object
+2. Functions:
 - `lane_speed`, to get speed of desired lane
 - `subcost_Speed`:, cost function for speed limit violation
 - `subcost_Acceleration`, cost function for acceleration limit violation
