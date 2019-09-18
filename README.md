@@ -4,7 +4,7 @@ This is a collection of projects that I have done in Self-Driving Car Nanodegree
 ## Projects include:
 1. Lane lines finding
 2. Advanced lane lines finding
-3. Traffic sign classifier using LeNet
+3. Traffic sign classifier
 4. Transfer learning for behavioral cloning
 5. Extended Kalman Filter
 6. Kidnapped Vehicle Project
