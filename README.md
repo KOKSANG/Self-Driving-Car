@@ -10,3 +10,4 @@ This is a collection of projects that I have done in Self-Driving Car Nanodegree
 6. Kidnapped Vehicle Project
 7. Path Planning
 8. PID Controller
+9. Capstone Project
